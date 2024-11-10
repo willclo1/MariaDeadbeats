@@ -13,7 +13,7 @@ This virtual environment contains essential Python libraries and frameworks requ
 
 ```bash
 git clone https://github.com/willclo1/MariaDeadbeats.git
-cd MariaDeadbeaths
+cd MariaDeadbeats
 ```
 
 2. **Create a Virtual Environment**
