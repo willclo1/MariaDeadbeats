@@ -10,3 +10,4 @@ class Leagues(Base):
     league_name = Column(VARCHAR(50), nullable=False)
     league_active = Column(CHAR(1), nullable=False)
 
+
