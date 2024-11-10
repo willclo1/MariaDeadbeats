@@ -12,8 +12,8 @@ This virtual environment contains essential Python libraries and frameworks requ
 1. **Clone the Repository**:
 
 ```bash
-git clone https://github.com/sanjelarun/csi3335-project-venv.git
-cd csi3335-project-venv
+git clone https://github.com/willclo1/MariaDeadbeats.git
+cd MariaDeadbeaths
 ```
 
 2. **Create a Virtual Environment**
