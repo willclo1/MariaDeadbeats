@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Tables.People import People
 from cfg import engineStr
-from tableActions.csvActions import getNewData, getPeopleData
+from tableActions.csvActions import getPeopleData
 from datetime import datetime
 
 

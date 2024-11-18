@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, String, SmallInteger, CHAR, VARCHAR
+from sqlalchemy import Column, SmallInteger, VARCHAR
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import DeclarativeBase
 
