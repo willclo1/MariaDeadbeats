@@ -1,0 +1,52 @@
+from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker
+from Tables.Fielding import Fielding
+from cfg import engineStr
+from tableActions.csvActions import getNewData
+
+def fillFielding():
+
+    engine = create_engine(engineStr)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    try:
+        currData = getNewData("lahman_1871-2023_csv/Fielding.csv")
+
+        for row in currData:
+            new_record = Fielding(
+                playerID=row[0],
+                yearID=int(row[1]),
+                stint=int(row[2]),
+                teamID=row[3],
+                position=row[5],
+                f_G=int(row[6]) if row[6] else None,
+                f_GS=int(row[7]) if row[7] else None,
+                f_InnOuts=int(row[8]) if row[8] else None,
+                f_PO=int(row[9]) if row[9] else None,
+                f_A=int(row[10]) if row[10] else None,
+                f_E=int(row[11]) if row[11] else None,
+                f_DP=int(row[12]) if row[12] else None,
+                f_PB=int(row[13]) if row[13] else None,
+                f_WP=int(row[14]) if row[14] else None,
+                f_SB=int(row[15]) if row[15] else None,
+                f_CS=int(row[16]) if row[16] else None,
+                f_ZR=int(row[17]) if row[17] else None,
+            )
+            session.add(new_record)  # Add the record to the session
+            print(f"Added record for playerID: {row[0]}, yearID: {row[1]}")
+
+        session.commit()
+        print("All 2023 records successfully added to the batting table.")
+
+    except IntegrityError as e:
+        session.rollback()  # Rollback if an error occurs
+        print(f"An integrity error occurred: {e}")
+    except Exception as e:
+        session.rollback()
+        print(f"An error occurred: {e}")
+    finally:
+        session.close()  # Close the session
+
+fillFielding()

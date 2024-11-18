@@ -39,6 +39,7 @@ def fillAppearances():
         print(new_row.playerID , "Added")
         session.add(new_row)
     session.rollback()
+    session.close()
 
 fillAppearances()
 

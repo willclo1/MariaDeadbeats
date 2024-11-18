@@ -26,4 +26,5 @@ def fillAllStartFull():
         session.add(new_row)
     session.rollback()
 
+    session.close()
 fillAllStartFull()

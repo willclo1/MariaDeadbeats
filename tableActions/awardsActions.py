@@ -30,6 +30,7 @@ def fillAwards():
 
 
     session.rollback()
+    session.close()
 
 
 fillAwards()
