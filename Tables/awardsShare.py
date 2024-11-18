@@ -6,7 +6,7 @@ class Base(DeclarativeBase):
     pass
 class AwardsShare(Base):
     __tablename__ = 'awardsshare'
-    awardshare_id = Column(INTEGER(12), primary_key=True, autoincrement=True)
+    awardsshare_id = Column(INTEGER(12), primary_key=True, autoincrement=True)
     awardID = Column(VARCHAR(255), nullable=False)
     yearID = Column(SmallInteger, nullable=False)
     playerID = Column(VARCHAR(9), nullable=False)

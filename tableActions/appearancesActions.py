@@ -2,13 +2,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from Tables.appearances import Appearances
-from cfg import cfg
+from cfg import engineStr
 from tableActions.csvActions import getNewData
 
 
 def fillAppearances():
-    engineStr = "mysql+pymysql://" + cfg.get("user") + ":" + cfg.get("password") + "@" + cfg.get(
-        "host") + ":3306/" + cfg.get("db")
 
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
