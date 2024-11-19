@@ -36,13 +36,9 @@ def fillHomeGame():
             )
             session.add(new_person)
 
-        session.rollback()
-        print("home game table successfully populated.")
+        session.commit()
+        print("home games updated")
     except Exception as e:
         session.rollback()
-        print(f"An error occurred: {e}")
     finally:
         session.close()
-
-
-fillHomeGame()

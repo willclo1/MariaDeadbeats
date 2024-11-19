@@ -35,18 +35,13 @@ def fillFielding():
                 f_ZR=int(row[17]) if row[17] else None,
             )
             session.add(new_record)  # Add the record to the session
-            print(f"Added record for playerID: {row[0]}, yearID: {row[1]}")
 
         session.commit()
-        print("All 2023 records successfully added to the batting table.")
+        print("Fielding updated")
 
-    except IntegrityError as e:
-        session.rollback()  # Rollback if an error occurs
-        print(f"An integrity error occurred: {e}")
     except Exception as e:
         session.rollback()
         print(f"An error occurred: {e}")
     finally:
-        session.close()  # Close the session
+        session.close()
 
-fillFielding()

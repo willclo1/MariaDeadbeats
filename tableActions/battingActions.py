@@ -38,19 +38,14 @@ def fillBatting():
                 b_SF=int(row[20]) if row[20] else None,
                 b_GIDP=int(row[21]) if row[21] else None,
             )
-            session.add(new_record)  # Add the record to the session
-            print(f"Added record for playerID: {row[0]}, yearID: {row[1]}")
+            session.add(new_record)
+
 
         session.commit()
-        print("All 2023 records successfully added to the batting table.")
-
-    except IntegrityError as e:
-        session.rollback()  # Rollback if an error occurs
-        print(f"An integrity error occurred: {e}")
+        print("Batting updated")
     except Exception as e:
         session.rollback()
         print(f"An error occurred: {e}")
     finally:
         session.close()  # Close the session
 
-fillBatting()

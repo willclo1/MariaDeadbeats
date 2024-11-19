@@ -32,18 +32,11 @@ def fillFieldingPost():
                 f_PB=int(row[14]) if row[14] else None,
             )
             session.add(new_record)
-            print(f"Added record for playerID: {row[0]}, yearID: {row[1]}")
 
         session.commit()
-        print("All 2023 records successfully added to the batting table.")
-
-    except IntegrityError as e:
-        session.rollback()  # Rollback if an error occurs
-        print(f"An integrity error occurred: {e}")
+        print("Fielding post updated")
     except Exception as e:
         session.rollback()
         print(f"An error occurred: {e}")
     finally:
-        session.close()  # Close the session
-
-fillFieldingPost()
+        session.close()

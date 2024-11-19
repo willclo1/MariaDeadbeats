@@ -39,18 +39,12 @@ def fillBattingPost():
                 b_GIDP=int(row[21]) if row[21] else None,
             )
             session.add(new_record)  # Add the record to the session
-            print(f"Added record for playerID: {row[0]}, yearID: {row[1]}")
+
 
         session.commit()
-        print("All 2023 records successfully added to the batting table.")
-
-    except IntegrityError as e:
-        session.rollback()
-        print(f"An integrity error occurred: {e}")
+        print("Batting Post updated")
     except Exception as e:
         session.rollback()
         print(f"An error occurred: {e}")
     finally:
         session.close()
-
-fillBattingPost()

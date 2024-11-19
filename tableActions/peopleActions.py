@@ -50,12 +50,10 @@ def fillPeople():
             session.merge(new_person)
 
         session.commit()
-        print("People table successfully populated.")
+        print("People table updated")
     except Exception as e:
         session.rollback()
         print(f"An error occurred: {e}")
     finally:
         session.close()
 
-
-fillPeople()

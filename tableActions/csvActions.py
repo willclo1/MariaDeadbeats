@@ -4,9 +4,11 @@ def getNewData(fileName):
     with open(fileName) as file:
         data = csv.reader(file, delimiter=',')
         header = next(data)
-        year_index = header.index("yearID") if "yearID" in header else None
+        # Convert header to lowercase for case-insensitive matching
+        lower_header = [col.lower() for col in header]
+        year_index = lower_header.index("yearid") if "yearid" in lower_header else None
         if year_index is None:
-            raise ValueError("The CSV file does not contain a 'yearID' column.")
+            raise ValueError("The CSV file does not contain a 'yearID' column (case-insensitive).")
 
         for row in data:
             if row[year_index] == "2023":
