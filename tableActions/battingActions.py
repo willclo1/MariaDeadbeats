@@ -1,9 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.sync import update
+
 from Tables.Batting import Batting
 from cfg import engineStr
-from tableActions.csvActions import getNewData
+from tableActions.csvActions import getNewData, getAllData
+
 
 def fillBatting():
 
@@ -13,6 +16,9 @@ def fillBatting():
 
     try:
         currData = getNewData("lahman_1871-2023_csv/Batting.csv")
+
+        warData = getAllData("lahman_1871-2023_csv/jeffbagwell_war_historical_2023.csv")
+
 
         for row in currData:
             new_record = Batting(
@@ -40,6 +46,19 @@ def fillBatting():
             )
             session.add(new_record)
 
+        for row in warData:
+            player_id = row[2]
+            year_id = int(row[3])
+            if row[19] != 'NA':
+                war_value = float(row[19])
+            else:
+                war_value = None
+
+            session.query(Batting).filter(
+                Batting.playerID == player_id, Batting.yearId == year_id
+            ).update({"b_WAR": war_value})
+
+
 
         session.commit()
         print("Batting updated")
@@ -48,4 +67,3 @@ def fillBatting():
         print(f"An error occurred: {e}")
     finally:
         session.close()  # Close the session
-

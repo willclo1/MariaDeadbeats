@@ -1,3 +1,4 @@
+from tableActions import fillFielding
 from tableActions.peopleActions import fillPeople
 from tableActions.allStarFullActions import fillAllStartFull
 from tableActions.appearancesActions import fillAppearances
@@ -18,6 +19,7 @@ from tableActions.teamActions import fillTeams
 def updateDB():
     try:
         fillPeople()
+        fillFielding()
         fillAllStartFull()
         fillAppearances()
         fillAwards()

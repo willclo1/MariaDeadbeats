@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, SmallInteger, CHAR, VARCHAR
+from sqlalchemy import Integer, Column, SmallInteger, CHAR, VARCHAR, Double
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import DeclarativeBase
 
@@ -23,6 +23,7 @@ class Batting(Base):
     b_SB = Column(SmallInteger, nullable=True)
     b_CS = Column(SmallInteger, nullable=True)
     b_BB = Column(SmallInteger, nullable=True)
+    b_WAR = Column(Double, nullable=True)
     b_SO = Column(SmallInteger, nullable=True)
     b_IBB = Column(SmallInteger, nullable=True)
     b_HBP = Column(SmallInteger, nullable=True)

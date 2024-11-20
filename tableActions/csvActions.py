@@ -50,3 +50,13 @@ def getHomeData(fileName):
                 currData.append(row)
 
     return currData
+
+def getAllData(fileName):
+    currData = []
+    with open(fileName, encoding='latin1') as file:
+        data = csv.reader(file, delimiter=',')
+        header = next(data)
+        for row in data:
+            currData.append(row)
+
+    return currData
