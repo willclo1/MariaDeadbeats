@@ -15,6 +15,7 @@ from tableActions.pitchingActions import fillPitching
 from tableActions.pitchingPostActions import fillPostPitching
 from tableActions.seriesPostActions import fillSeriesPost
 from tableActions.teamActions import fillTeams
+from tableActions.DraftActions import fillDraft
 
 def updateDB():
     try:
@@ -34,6 +35,7 @@ def updateDB():
         fillPitching()
         fillPostPitching()
         fillSeriesPost()
+        fillDraft()
         fillTeams()
     except Exception as e:
         print(e)
