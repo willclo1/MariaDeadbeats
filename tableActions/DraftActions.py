@@ -8,10 +8,7 @@ import csv
 
 
 def fillDraft():
-    """
-    Populate the Draft table using data from the draft CSV and the People table.
-    Uses additional attributes like weight, bats, throws, and birth_date for accurate mapping.
-    """
+
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()

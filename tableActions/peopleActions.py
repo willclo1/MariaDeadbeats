@@ -45,7 +45,7 @@ def fillPeople():
                 bats=row[19],
                 throws=row[20],
                 debutDate=parse_date(row[21]),
-                finalGameDate=parse_date(row[22])
+                finalGameDate=parse_date(row[23])
             )
             session.merge(new_person)
 
