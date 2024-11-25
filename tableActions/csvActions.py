@@ -75,6 +75,7 @@ def getDraftData(fileName):
         name_index = header.index("name_first_last")
         round_index = header.index("round")
         pick_index = header.index("pick")
+        year_index = header.index("year")
         description_index = header.index("description")
         weight_index = header.index("weight")
         bats_index = header.index("bats")
@@ -82,16 +83,13 @@ def getDraftData(fileName):
         birth_date_index = header.index("birth_date")
 
         for row in data:
-            # Split the name into first and last
             full_name = row[name_index].strip().split(" ", 1)
             nameFirst = full_name[0] if len(full_name) > 0 else None
             nameLast = full_name[1] if len(full_name) > 1 else None
 
-            # Validate round and pick values
             round_value = int(row[round_index]) if row[round_index].isdigit() else None
             pick_value = int(row[pick_index]) if row[pick_index].isdigit() else None
 
-            # Parse additional fields for mapping
             weight_value = int(row[weight_index]) if row[weight_index].isdigit() else None
             bats_value = row[bats_index] if row[bats_index] else None
             throws_value = row[throws_index] if row[throws_index] else None
@@ -112,8 +110,9 @@ def getDraftData(fileName):
                 "bats": bats_value,
                 "throws": throws_value,
                 "birth_date": birth_date_value,
+                "year" :row[year_index],
             }
-
-            draft_data.append(draft_row)
+            if row[description_index] == "June Amateur Draft":
+                draft_data.append(draft_row)
 
     return draft_data

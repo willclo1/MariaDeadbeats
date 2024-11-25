@@ -10,6 +10,7 @@ class Draft(Base):
     __tablename__ = 'draft'
     drafts_id = Column(INTEGER(11), primary_key=True, autoincrement=True)
     playerID = Column(VARCHAR(9), nullable=False)
+    yearID = Column(SmallInteger, nullable=False)
     nameFirst = Column(VARCHAR(255), nullable=True)
     nameLast = Column(VARCHAR(255), nullable=True, index=True)
     round = Column(SmallInteger, nullable=True)
