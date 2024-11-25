@@ -1,4 +1,4 @@
-from tableActions import fillFielding
+from tableActions import fillFielding, create_admins_table
 from tableActions.peopleActions import fillPeople
 from tableActions.allStarFullActions import fillAllStartFull
 from tableActions.appearancesActions import fillAppearances
@@ -16,6 +16,7 @@ from tableActions.pitchingPostActions import fillPostPitching
 from tableActions.seriesPostActions import fillSeriesPost
 from tableActions.teamActions import fillTeams
 from tableActions.DraftActions import fillDraft
+from tableActions.create_users_table import create_users_table
 
 def updateDB():
     try:
@@ -37,6 +38,8 @@ def updateDB():
         fillSeriesPost()
         fillDraft()
         fillTeams()
+        create_users_table()
+        create_admins_table()
     except Exception as e:
         print(e)
     finally:
