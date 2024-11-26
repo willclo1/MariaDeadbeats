@@ -7,7 +7,7 @@ import random
 app = Flask(__name__)
 
 # URL of the website
-URL = "https://www.immaculategrid.com/grid-341"
+URL = "https://www.immaculategrid.com/grid-1"
 
 # Normalize input values
 def normalize_input(value):
@@ -93,8 +93,14 @@ def get_players_for_team(team_name):
     """
     return execute_query(query, (franch_id,))
 
+
+
+
+
+
 # Query players for trivia
 def get_players_for_trivia(trivia):
+
     trivia_map = {
         "30+ HR /30+ SB SeasonBatting": """
         SELECT playerID
@@ -326,7 +332,11 @@ def get_players_for_trivia(trivia):
         "40+ HR SeasonBatting": "SELECT playerID FROM batting WHERE b_HR >= 40;",
         "40+ Save SeasonPitching": "SELECT playerID FROM pitching WHERE p_SV >= 40;",
         # Non-stats-related trivia
-        "All Star": "SELECT playerID FROM awards WHERE awardID like '%All-Star';",
+        "All Star": """
+        SELECT DISTINCT playerID
+        FROM awards
+        WHERE awardID = 'All-Star Game MVP';
+    """,
         "Born Outside US 50 States and DC": "SELECT playerID FROM people WHERE birthCountry NOT IN ('USA', 'United States');",
         "Canada": "SELECT playerID FROM people WHERE birthCountry = 'Canada';",
         "Cy Young": "SELECT playerID FROM awards WHERE awardID = 'Cy Young';",
@@ -376,12 +386,13 @@ def get_players_for_trivia(trivia):
         "≤ 3.00 ERA Season": "SELECT playerID FROM pitching WHERE p_ER / (p_IPOuts / 3) <= 3.00;",
     }
 
-
     normalized_trivia = normalize_input(trivia)
     query = trivia_map.get(normalized_trivia)
     if not query:
         print(f"No SQL query mapped for trivia: {normalized_trivia}")
         return set()
+
+
     return execute_query(query)
 
 # Determine if input is a team
@@ -408,13 +419,17 @@ def get_players_for_team_and_trivia(team_name, trivia):
     team_name = normalize_team_name(team_name)
     trivia = normalize_input(trivia)
     query = trivia_team_map.get(trivia)
-    if query:
-        # Replace team filtering with team_name
-        team_specific_results = execute_query(query, (team_name,))
-        if team_specific_results:
-            return team_specific_results
+    if not query:
+        print(f"No team-specific query mapped for trivia: {trivia}")
+        return set()
 
-    # Fallback to general trivia query if no team-specific results are found
+
+    params = (team_name,)
+    team_specific_results = execute_query(query, params)
+
+    if team_specific_results:
+        return team_specific_results
+
     print(f"No team-specific match found for trivia: {trivia}. Trying general trivia query.")
     return get_players_for_trivia(trivia)
 
@@ -516,6 +531,13 @@ def scrape_immaculate_grid():
 
 # Define your trivia_team_map with all the necessary queries
 trivia_team_map = {
+"All Star": """
+        SELECT DISTINCT ap.playerID
+        FROM awards ap
+        JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
+        JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+        WHERE ap.awardID = 'All-Star Game MVP' AND t.team_name = %s;
+    """,
 "300+ HR CareerBatting": """
         SELECT playerID
         FROM (
@@ -795,14 +817,6 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
     );
 """,
 
-    "All Star": """
-      SELECT DISTINCT ap.playerID
-      FROM awards ap
-      JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
-      JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID like '%All-Star' AND t.team_name = %s;
-  """,
-
     "Cy Young": """
       SELECT DISTINCT ap.playerID
       FROM awardsplayers ap
@@ -848,7 +862,7 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
       FROM halloffame h
       JOIN appearances a ON h.playerID = a.playerID
       JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE t.team_name = %s AND h.inducted = 'Y';
+      WHERE t.team_name = %s AND h.inducted = 'Y' AND h.yearid != 2013;
   """,
 
     # For "Threw a No-Hitter", since it's a specific event, we need to ensure the data reflects that.
