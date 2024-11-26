@@ -20,6 +20,7 @@ class Users(Base):
         index=True, default=lambda: datetime.now(timezone.utc)
     )
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
+    is_admin: so.Mapped[bool] = so.mapped_column(sa.Boolean)
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
