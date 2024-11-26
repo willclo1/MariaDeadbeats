@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Immaculate Grid Solver</title>
+    <style>
+        /* Basic styles for the grid */
+        table {
+            border-collapse: collapse;
+            margin: auto;
+        }
+        th, td {
+            border: 1px solid black;
+            width: 150px;
+            height: 100px;
+            text-align: center;
+            vertical-align: middle;
+            padding: 5px;
+        }
+        #solve-button, #load-button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #puzzle-input {
+            display: block;
+            margin: 10px auto;
+            text-align: center;
+        }
+        #error-message {
+            color: red;
+            text-align: center;
+        }
+        #puzzle-number-display {
+            text-align: center;
+            font-size: 18px;
+        }
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Immaculate Grid Solver</h1>
+    <div id="puzzle-number-display">
+        {% if latest_puzzle_number %}
+            <p>Current Puzzle Number: {{ puzzle_number or latest_puzzle_number }}</p>
+        {% endif %}
+    </div>
+    <form method="post">
+        <div id="puzzle-input">
+            <label for="puzzle_number">Enter Puzzle Number (1 - {{ latest_puzzle_number }}):</label>
+            <input type="number" id="puzzle_number" name="puzzle_number" min="1" max="{{ latest_puzzle_number }}" value="{{ puzzle_number or latest_puzzle_number }}" required>
+            <button type="submit" name="action" value="load_puzzle" id="load-button">Load Puzzle</button>
+        </div>
+    </form>
+    {% if top_row and left_column %}
+    <table>
+        <tr>
+            <th></th>
+            {% for col_value in top_row %}
+            <th>{{ col_value }}</th>
+            {% endfor %}
+        </tr>
+        {% for row_value in left_column %}
+        {% set row_index = loop.index0 %}
+        <tr>
+            <th>{{ row_value }}</th>
+            {% for col_index in range(0, top_row|length) %}
+            <td>
+                {% if grid %}
+                    {% if grid[row_index][col_index] == "No Match" %}
+                        No Match
+                    {% else %}
+                        {{ grid[row_index][col_index][0] }}<br>
+                        <small>{{ grid[row_index][col_index][1] }}</small>
+                    {% endif %}
+                {% else %}
+                    <!-- Empty cell -->
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <form method="post">
+        <input type="hidden" name="puzzle_number" value="{{ puzzle_number }}">
+        <button type="submit" id="solve-button" name="action" value="solve_puzzle">Solve</button>
+    </form>
+    {% endif %}
+    {% if error_message %}
+    <p id="error-message">{{ error_message }}</p>
+    {% endif %}
+</body>
+</html>
