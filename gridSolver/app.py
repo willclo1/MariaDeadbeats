@@ -7,7 +7,7 @@ import random
 app = Flask(__name__)
 
 # URL of the website
-URL = "https://www.immaculategrid.com/grid-1"
+URL = "https://www.immaculategrid.com/grid-3"
 
 # Normalize input values
 def normalize_input(value):
@@ -339,7 +339,7 @@ def get_players_for_trivia(trivia):
     """,
         "Born Outside US 50 States and DC": "SELECT playerID FROM people WHERE birthCountry NOT IN ('USA', 'United States');",
         "Canada": "SELECT playerID FROM people WHERE birthCountry = 'Canada';",
-        "Cy Young": "SELECT playerID FROM awards WHERE awardID = 'Cy Young';",
+        "Cy Young": "SELECT playerID FROM awards WHERE awardID = 'Cy Young Award';",
         "Designated Hittermin. 1 game": "SELECT playerID FROM appearances WHERE G_dh > 0;",
         "Dominican Republic": "SELECT playerID FROM people WHERE birthCountry = 'Dominican Republic';",
         "Gold Glove": "SELECT playerID FROM awards WHERE awardID = 'Gold Glove';",
@@ -819,7 +819,7 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
 
     "Cy Young": """
       SELECT DISTINCT ap.playerID
-      FROM awardsplayers ap
+      FROM awards ap
       JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
       JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
       WHERE ap.awardID = 'Cy Young Award' AND t.team_name = %s;
