@@ -74,8 +74,10 @@ def get_franchise_id(team_name):
 def get_players_for_team(team_name):
     """
     Fetch playerIDs for a given team, filtering by franchID to handle name changes.
+
     """
     # Query players by franchID
+    team_name = normalize_team_name(team_name)
     query = """
     SELECT DISTINCT a.playerID
 FROM appearances a
