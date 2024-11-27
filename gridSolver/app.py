@@ -7,7 +7,7 @@ import random
 app = Flask(__name__)
 
 # URL of the website
-URL = "https://www.immaculategrid.com/grid-7"
+URL = "https://www.immaculategrid.com/grid-9"
 
 # Normalize input values
 def normalize_input(value):
@@ -363,7 +363,7 @@ def get_players_for_trivia(trivia):
         "Played Shortstopmin. 1 game": "SELECT playerID FROM appearances WHERE G_ss > 0;",
         "Played Third Basemin. 1 game": "SELECT playerID FROM appearances WHERE G_3b > 0;",
         "Puerto Rico": "SELECT playerID FROM people WHERE birthCountry = 'Puerto Rico';",
-        "Rookie of the Year": "SELECT playerID FROM awards WHERE awardID = 'Rookie of the Year';",
+        "Rookie of the Year": "SELECT playerID FROM awards WHERE awardID = 'Rookie of the Year Award';",
         "Silver Slugger": "SELECT playerID FROM awards WHERE awardID = 'Silver Slugger';",
         "Threw a No-Hitter": "SELECT playerID FROM pitching WHERE p_SHO > 0;",  # Approximation
         "United States": "SELECT playerID FROM people WHERE birthCountry = 'USA';",
@@ -843,7 +843,7 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
 
     "Rookie of the Year": """
       SELECT DISTINCT ap.playerID
-      FROM awardsplayers ap
+      FROM awards ap
       JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
       JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
       WHERE ap.awardID = 'Rookie of the Year' AND t.team_name = %s;
@@ -863,15 +863,6 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
       JOIN appearances a ON h.playerID = a.playerID
       JOIN teams t ON a.teamID = t.teamID
       WHERE t.team_name = %s AND h.inducted = 'Y';
-  """,
-
-    # For "Threw a No-Hitter", since it's a specific event, we need to ensure the data reflects that.
-    # Assuming you have a 'nohitters' table:
-    "Threw a No-Hitter": """
-      SELECT DISTINCT nh.playerID
-      FROM nohitters nh
-      JOIN teams t ON nh.teamID = t.teamID AND nh.yearID = t.yearID
-      WHERE t.team_name = %s;
   """,
 
     "Threw a No-Hitter": """
