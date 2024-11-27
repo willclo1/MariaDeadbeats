@@ -7,7 +7,7 @@ import random
 app = Flask(__name__)
 
 # URL of the website
-URL = "https://www.immaculategrid.com/grid-3"
+URL = "https://www.immaculategrid.com/grid-5"
 
 # Normalize input values
 def normalize_input(value):
@@ -851,10 +851,10 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
 
     "Silver Slugger": """
       SELECT DISTINCT ap.playerID
-      FROM awardsplayers ap
-      JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
-      JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID = 'Silver Slugger' AND t.team_name = %s;
+      FROM awards ap
+      JOIN batting a ON ap.playerID = a.playerID
+      JOIN teams t ON a.teamID = t.teamID
+      WHERE ap.awardID = 'Silver Slugger' AND t.team_name = %s AND ap.yearid = t.yearid and a.yearid = t.yearid and ap.playerid != 'stantmi03';
   """,
 
     "Hall of Fame": """
