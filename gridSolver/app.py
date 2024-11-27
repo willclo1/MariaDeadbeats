@@ -432,7 +432,7 @@ def get_players_for_team_and_trivia(team_name, trivia):
         return team_specific_results
 
     print(f"No team-specific match found for trivia: {trivia}. Trying general trivia query.")
-    return get_players_for_trivia(trivia)
+    return []
 
 # Fetch the playerName from the MySQL database using playerID
 def get_player_name_and_years_from_db(player_id):
@@ -677,22 +677,31 @@ trivia_team_map = {
     )  AND p.p_SV >= 40;
     """,
     "500+ HR CareerBatting": """
-        SELECT playerID
-        FROM (
-            SELECT b.playerID, SUM(b.b_HR) AS total_hr
-            FROM batting b
-            JOIN teams t ON b.teamID = t.teamID
-            WHERE t.franchid = (
-        SELECT franchid
-        FROM teams
-        WHERE team_name = %s
-        GROUP BY franchid
-        ORDER BY COUNT(*) DESC
-        LIMIT 1
-    ) 
-            GROUP BY b.playerID
-            HAVING total_hr >= 500
-        ) AS career_hr;
+       SELECT p.playerID
+FROM (
+    -- Step 1: Find players with 500+ career home runs across all franchises
+    SELECT playerID
+    FROM batting
+    GROUP BY playerID
+    HAVING SUM(b_HR) >= 500
+) AS p
+WHERE EXISTS (
+    -- Step 2: Ensure the player has at least one game with a team matching the team_name pattern
+    SELECT 1
+    FROM batting b
+    JOIN teams t ON b.teamID = t.teamID
+    WHERE b.playerID = p.playerID
+      AND t.franchid = (
+          SELECT franchid
+          FROM teams
+          WHERE team_name LIKE %s
+          GROUP BY franchid
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+      )
+    LIMIT 1
+);
+
     """,
     "Born Outside US 50 States and DC": """
         SELECT playerID
@@ -801,7 +810,7 @@ WHERE p.birthCountry = 'USA' AND t.franchid = (
         WHERE t.franchid = (
         SELECT franchid
         FROM teams
-        WHERE team_name = %s
+        WHERE team_name = %s and t.yearid > 1902
         GROUP BY franchid
         ORDER BY COUNT(*) DESC
         LIMIT 1
