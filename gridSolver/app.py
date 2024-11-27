@@ -336,8 +336,7 @@ def get_players_for_trivia(trivia):
         # Non-stats-related trivia
         "All Star": """
         SELECT DISTINCT playerID
-        FROM awards
-        WHERE awardID = 'All-Star Game MVP';
+        FROM allstarfull;
     """,
         "Born Outside US 50 States and DC": "SELECT playerID FROM people WHERE birthCountry NOT IN ('USA', 'United States');",
         "Canada": "SELECT playerID FROM people WHERE birthCountry = 'Canada';",
@@ -543,10 +542,10 @@ def scrape_immaculate_grid(puzzle_number=None):
 trivia_team_map = {
 "All Star": """
         SELECT DISTINCT ap.playerID
-        FROM awards ap
+        FROM allstarfull ap
         JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
         JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID and ap.yearid = t.yearid
-        WHERE ap.awardID = 'All-Star Game MVP' AND t.franchid = (
+        WHERE t.franchid = (
         SELECT franchid
         FROM teams
         WHERE team_name = %s
