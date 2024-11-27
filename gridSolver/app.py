@@ -338,7 +338,7 @@ def get_players_for_trivia(trivia):
         SELECT DISTINCT playerID
         FROM allstarfull;
     """,
-        "Born Outside US 50 States and DC": "SELECT playerID FROM people WHERE birthCountry NOT IN ('USA', 'United States');",
+        "Born Outside US 50 States and DC": "SELECT playerID FROM people WHERE birthCountry NOT IN ('USA', 'United States', 'US');",
         "Canada": "SELECT playerID FROM people WHERE birthCountry = 'Canada';",
         "Cy Young": "SELECT playerID FROM awards WHERE awardID = 'Cy Young Award';",
         "Designated Hittermin. 1 game": "SELECT playerID FROM appearances WHERE G_dh > 0;",
@@ -697,7 +697,7 @@ trivia_team_map = {
     "Born Outside US 50 States and DC": """
         SELECT playerID
         FROM players
-        WHERE (birth_country NOT IN ('USA') OR birth_state NOT IN ('AL', 'AK', ..., 'WY', 'DC'))
+        WHERE (birthCountry NOT IN ('USA', 'US'))
           AND teamID IN (
               SELECT teamID FROM teams WHERE franchid = (
         SELECT franchid
@@ -712,7 +712,7 @@ trivia_team_map = {
     "Canada": """
         SELECT playerID
         FROM players
-        WHERE birth_country = 'Canada'
+        WHERE birthCountry = 'Canada'
           AND teamID IN (
               SELECT teamID FROM teams WHERE franchid = (
         SELECT franchid
@@ -727,7 +727,7 @@ trivia_team_map = {
     "Dominican Republic": """
         SELECT playerID
         FROM players
-        WHERE birth_country = 'Dominican Republic'
+        WHERE birthCountry = 'Dominican Republic'
           AND teamID IN (
               SELECT teamID FROM teams WHERE franchid = (
         SELECT franchid
@@ -768,7 +768,7 @@ trivia_team_map = {
     "Puerto Rico": """
         SELECT playerID
         FROM players
-        WHERE birth_country = 'Puerto Rico'
+        WHERE birthCountry = 'Puerto Rico'
           AND teamID IN (
               SELECT teamID FROM teams WHERE franchid = (
         SELECT franchid
