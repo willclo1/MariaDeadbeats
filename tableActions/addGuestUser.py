@@ -34,16 +34,9 @@ def create_guest_user():
         execute_sql(create_user_sql)
         print(f"User '{GUEST_USERNAME}' created successfully.")
 
-        # Grant SELECT privileges to the guest user
-        grant_privileges_sql = f"GRANT SELECT ON {DATABASE_NAME}.* TO '{GUEST_USERNAME}'@'localhost';"
-        execute_sql(grant_privileges_sql)
-        print(f"Read-only privileges granted to '{GUEST_USERNAME}' for database '{DATABASE_NAME}'.")
-
-        # Flush privileges to ensure changes are applied
-        flush_privileges_sql = "FLUSH PRIVILEGES;"
-        execute_sql(flush_privileges_sql)
-        print("Privileges flushed successfully.")
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
+create_guest_user()
 
