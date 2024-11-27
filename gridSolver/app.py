@@ -7,7 +7,7 @@ import random
 app = Flask(__name__)
 
 # URL of the website
-URL = "https://www.immaculategrid.com/grid-5"
+URL = "https://www.immaculategrid.com/grid-7"
 
 # Normalize input values
 def normalize_input(value):
@@ -861,8 +861,8 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
       SELECT DISTINCT h.playerID
       FROM halloffame h
       JOIN appearances a ON h.playerID = a.playerID
-      JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE t.team_name = %s AND h.inducted = 'Y' AND h.yearid != 2013;
+      JOIN teams t ON a.teamID = t.teamID
+      WHERE t.team_name = %s AND h.inducted = 'Y';
   """,
 
     # For "Threw a No-Hitter", since it's a specific event, we need to ensure the data reflects that.
