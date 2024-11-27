@@ -75,23 +75,23 @@ def get_players_for_team(team_name):
     """
     Fetch playerIDs for a given team, filtering by franchID to handle name changes.
     """
-    # Get the franchise ID for the team
-    franch_id = get_franchise_id(team_name)
-    if not franch_id:
-        print(f"No franchID found for team: {team_name}")
-        return set()
-
     # Query players by franchID
     query = """
-    SELECT DISTINCT playerID
-    FROM appearances
-    WHERE teamID IN (
-        SELECT teamID
-        FROM teams
-        WHERE franchID = %s
-    );
+    SELECT DISTINCT a.playerID
+FROM appearances a
+JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+WHERE t.franchid = (
+    SELECT franchid
+    FROM teams
+    WHERE team_name = %s
+    GROUP BY franchid
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+);
+
+
     """
-    return execute_query(query, (franch_id,))
+    return execute_query(query, (team_name,))
 
 
 
@@ -793,10 +793,10 @@ WHERE p.birthCountry = 'USA' AND t.franchid = (
         LIMIT 1
     ) ;
     """,
-    "World Series Champ WS Roster": """
-        SELECT DISTINCT ws.playerID
-        FROM world_series_rosters ws
-        JOIN teams t ON ws.teamID = t.teamID AND ws.yearID = t.yearID
+    "World Series ChampWS Roster": """
+        SELECT DISTINCT playerID
+        from batting b
+        JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
         WHERE t.franchid = (
         SELECT franchid
         FROM teams
@@ -804,7 +804,7 @@ WHERE p.birthCountry = 'USA' AND t.franchid = (
         GROUP BY franchid
         ORDER BY COUNT(*) DESC
         LIMIT 1
-    ) ;
+    ) AND WSWin = 'Y';
     """,
 "30+ HR /30+ SB SeasonBatting": """
         SELECT DISTINCT s.playerID
