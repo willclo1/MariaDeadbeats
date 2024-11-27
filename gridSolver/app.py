@@ -482,12 +482,19 @@ def remove_duplicates_keep_detailed(items):
     return filtered_items
 
 # Scrape the grid
-def scrape_immaculate_grid():
+def scrape_immaculate_grid(puzzle_number=None):
+    """
+    Scrape the grid from immaculategrid.com. If a puzzle number is provided,
+    construct the URL with the given number. Otherwise, scrape the current day's grid.
+    """
+    url = f"https://www.immaculategrid.com"
+    if puzzle_number:
+        url = f"{url}/grid-{puzzle_number}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
     try:
-        response = requests.get(URL, headers=headers)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
     except Exception as e:
         print(f"Request failed: {e}")
@@ -528,6 +535,7 @@ def scrape_immaculate_grid():
     print("Left Column:", left_column)
 
     return top_row, left_column
+
 
 # Define your trivia_team_map with all the necessary queries
 trivia_team_map = {
@@ -998,10 +1006,13 @@ WHERE p.birthCountry = 'USA' AND t.franchid in (select franchid from teams where
 
 
 # Function to solve the puzzle
-def solve_puzzle():
-    # Scrape the grid
+def solve_puzzle(puzzle_number=None):
+    """
+    Solve the puzzle for the given puzzle number. If no puzzle number is provided,
+    solve the current day's puzzle.
+    """
     selected_player_ids = set()
-    top_row, left_column = scrape_immaculate_grid()
+    top_row, left_column = scrape_immaculate_grid(puzzle_number)
 
     # Ensure we have 3x3 grid values
     if len(top_row) != 3 or len(left_column) != 3:
@@ -1062,6 +1073,7 @@ def solve_puzzle():
 
     return top_row, left_column, grid
 
+
 # Define the Flask route
 
 def get_oldest_player(player_ids, selected_player_ids):
@@ -1109,19 +1121,55 @@ def get_oldest_player(player_ids, selected_player_ids):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """
+    Load and solve the grid puzzle. By default, load the current day's puzzle.
+    """
+    puzzle_number = None  # Default to the current day's puzzle
+
     if request.method == 'POST':
-        # The user clicked the 'Solve' button
-        top_row, left_column, grid = solve_puzzle()
-        return render_template('index.html', top_row=top_row, left_column=left_column, grid=grid)
-    else:
-        # GET request, render the page with empty grid
-        top_row, left_column = scrape_immaculate_grid()
-        if len(top_row) != 3 or len(left_column) != 3:
-            print("Error: Grid scraping did not produce a 3x3 grid.")
-            grid = [["Error"]] * 3
-        else:
+        # Get the puzzle number from the form input, if provided
+        puzzle_number = request.form.get('puzzle_number')
+        if puzzle_number:
+            try:
+                puzzle_number = int(puzzle_number)
+            except ValueError:
+                puzzle_number = None  # Fallback to the current day's puzzle
+
+        action = request.form.get('action')
+
+        if action == 'solve_puzzle':
+            # Solve the puzzle
+            top_row, left_column, grid = solve_puzzle(puzzle_number)
+            return render_template(
+                'index.html',
+                puzzle_number=puzzle_number,
+                top_row=top_row,
+                left_column=left_column,
+                grid=grid
+            )
+        elif action == 'load_puzzle':
+            # Load a specific puzzle
+            top_row, left_column = scrape_immaculate_grid(puzzle_number)
             grid = [["" for _ in range(3)] for _ in range(3)]
-        return render_template('index.html', top_row=top_row, left_column=left_column, grid=grid)
+            return render_template(
+                'index.html',
+                puzzle_number=puzzle_number,
+                top_row=top_row,
+                left_column=left_column,
+                grid=grid
+            )
+    else:
+        # GET request, load the current day's puzzle
+        top_row, left_column = scrape_immaculate_grid()
+        grid = [["" for _ in range(3)] for _ in range(3)]
+        return render_template(
+            'index.html',
+            puzzle_number=None,
+            top_row=top_row,
+            left_column=left_column,
+            grid=grid
+        )
+
 
 if __name__ == '__main__':
     app.run(debug=True)
