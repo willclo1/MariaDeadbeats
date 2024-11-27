@@ -48,12 +48,14 @@
         {% endif %}
     </div>
     <form method="post">
-        <div id="puzzle-input">
-            <label for="puzzle_number">Enter Puzzle Number (1 - {{ latest_puzzle_number }}):</label>
-            <input type="number" id="puzzle_number" name="puzzle_number" min="1" max="{{ latest_puzzle_number }}" value="{{ puzzle_number or latest_puzzle_number }}" required>
-            <button type="submit" name="action" value="load_puzzle" id="load-button">Load Puzzle</button>
-        </div>
-    </form>
+    <div id="puzzle-input">
+        <label for="puzzle_number">Enter Puzzle Number:</label>
+        <input type="number" id="puzzle_number" name="puzzle_number" min="1" placeholder="Current Day's Puzzle" value="{{ puzzle_number or '' }}">
+        <button type="submit" name="action" value="load_puzzle" id="load-button">Load Puzzle</button>
+        <button type="submit" name="action" value="solve_puzzle" id="solve-button">Solve Puzzle</button>
+    </div>
+</form>
+
     {% if top_row and left_column %}
     <table>
         <tr>
@@ -83,10 +85,6 @@
         </tr>
         {% endfor %}
     </table>
-    <form method="post">
-        <input type="hidden" name="puzzle_number" value="{{ puzzle_number }}">
-        <button type="submit" id="solve-button" name="action" value="solve_puzzle">Solve</button>
-    </form>
     {% endif %}
     {% if error_message %}
     <p id="error-message">{{ error_message }}</p>

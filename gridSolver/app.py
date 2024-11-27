@@ -7,7 +7,7 @@ import random
 app = Flask(__name__)
 
 # URL of the website
-URL = "https://www.immaculategrid.com/grid-341"
+URL = "https://www.immaculategrid.com/grid-18"
 
 # Normalize input values
 def normalize_input(value):
@@ -74,27 +74,35 @@ def get_franchise_id(team_name):
 def get_players_for_team(team_name):
     """
     Fetch playerIDs for a given team, filtering by franchID to handle name changes.
-    """
-    # Get the franchise ID for the team
-    franch_id = get_franchise_id(team_name)
-    if not franch_id:
-        print(f"No franchID found for team: {team_name}")
-        return set()
 
-    # Query players by franchID
-    query = """
-    SELECT DISTINCT playerID
-    FROM appearances
-    WHERE teamID IN (
-        SELECT teamID
-        FROM teams
-        WHERE franchID = %s
-    );
     """
-    return execute_query(query, (franch_id,))
+    # Query players by franchID
+    team_name = normalize_team_name(team_name)
+    query = """
+    SELECT DISTINCT a.playerID
+FROM appearances a
+JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+WHERE t.franchid = (
+    SELECT franchid
+    FROM teams
+    WHERE team_name = %s
+    GROUP BY franchid
+    ORDER BY COUNT(*) DESC
+    LIMIT 1
+);
+
+
+    """
+    return execute_query(query, (team_name,))
+
+
+
+
+
 
 # Query players for trivia
 def get_players_for_trivia(trivia):
+
     trivia_map = {
         "30+ HR /30+ SB SeasonBatting": """
         SELECT playerID
@@ -326,10 +334,13 @@ def get_players_for_trivia(trivia):
         "40+ HR SeasonBatting": "SELECT playerID FROM batting WHERE b_HR >= 40;",
         "40+ Save SeasonPitching": "SELECT playerID FROM pitching WHERE p_SV >= 40;",
         # Non-stats-related trivia
-        "All Star": "SELECT playerID FROM awards WHERE awardID like '%All-Star';",
+        "All Star": """
+        SELECT DISTINCT playerID
+        FROM allstarfull;
+    """,
         "Born Outside US 50 States and DC": "SELECT playerID FROM people WHERE birthCountry NOT IN ('USA', 'United States');",
         "Canada": "SELECT playerID FROM people WHERE birthCountry = 'Canada';",
-        "Cy Young": "SELECT playerID FROM awards WHERE awardID = 'Cy Young';",
+        "Cy Young": "SELECT playerID FROM awards WHERE awardID = 'Cy Young Award';",
         "Designated Hittermin. 1 game": "SELECT playerID FROM appearances WHERE G_dh > 0;",
         "Dominican Republic": "SELECT playerID FROM people WHERE birthCountry = 'Dominican Republic';",
         "Gold Glove": "SELECT playerID FROM awards WHERE awardID = 'Gold Glove';",
@@ -353,7 +364,7 @@ def get_players_for_trivia(trivia):
         "Played Shortstopmin. 1 game": "SELECT playerID FROM appearances WHERE G_ss > 0;",
         "Played Third Basemin. 1 game": "SELECT playerID FROM appearances WHERE G_3b > 0;",
         "Puerto Rico": "SELECT playerID FROM people WHERE birthCountry = 'Puerto Rico';",
-        "Rookie of the Year": "SELECT playerID FROM awards WHERE awardID = 'Rookie of the Year';",
+        "Rookie of the Year": "SELECT playerID FROM awards WHERE awardID = 'Rookie of the Year Award';",
         "Silver Slugger": "SELECT playerID FROM awards WHERE awardID = 'Silver Slugger';",
         "Threw a No-Hitter": "SELECT playerID FROM pitching WHERE p_SHO > 0;",  # Approximation
         "United States": "SELECT playerID FROM people WHERE birthCountry = 'USA';",
@@ -376,12 +387,13 @@ def get_players_for_trivia(trivia):
         "≤ 3.00 ERA Season": "SELECT playerID FROM pitching WHERE p_ER / (p_IPOuts / 3) <= 3.00;",
     }
 
-
     normalized_trivia = normalize_input(trivia)
     query = trivia_map.get(normalized_trivia)
     if not query:
         print(f"No SQL query mapped for trivia: {normalized_trivia}")
         return set()
+
+
     return execute_query(query)
 
 # Determine if input is a team
@@ -408,13 +420,17 @@ def get_players_for_team_and_trivia(team_name, trivia):
     team_name = normalize_team_name(team_name)
     trivia = normalize_input(trivia)
     query = trivia_team_map.get(trivia)
-    if query:
-        # Replace team filtering with team_name
-        team_specific_results = execute_query(query, (team_name,))
-        if team_specific_results:
-            return team_specific_results
+    if not query:
+        print(f"No team-specific query mapped for trivia: {trivia}")
+        return set()
 
-    # Fallback to general trivia query if no team-specific results are found
+
+    params = (team_name,)
+    team_specific_results = execute_query(query, params)
+
+    if team_specific_results:
+        return team_specific_results
+
     print(f"No team-specific match found for trivia: {trivia}. Trying general trivia query.")
     return get_players_for_trivia(trivia)
 
@@ -467,12 +483,19 @@ def remove_duplicates_keep_detailed(items):
     return filtered_items
 
 # Scrape the grid
-def scrape_immaculate_grid():
+def scrape_immaculate_grid(puzzle_number=None):
+    """
+    Scrape the grid from immaculategrid.com. If a puzzle number is provided,
+    construct the URL with the given number. Otherwise, scrape the current day's grid.
+    """
+    url = f"https://www.immaculategrid.com"
+    if puzzle_number:
+        url = f"{url}/grid-{puzzle_number}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
     try:
-        response = requests.get(URL, headers=headers)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
     except Exception as e:
         print(f"Request failed: {e}")
@@ -514,15 +537,37 @@ def scrape_immaculate_grid():
 
     return top_row, left_column
 
+
 # Define your trivia_team_map with all the necessary queries
 trivia_team_map = {
+"All Star": """
+        SELECT DISTINCT ap.playerID
+        FROM allstarfull ap
+        JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
+        JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID and ap.yearid = t.yearid
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
+    """,
 "300+ HR CareerBatting": """
         SELECT playerID
         FROM (
             SELECT b.playerID, SUM(b.b_HR) AS total_hr
             FROM batting b
             JOIN teams t ON b.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY b.playerID
             HAVING total_hr >= 300
         ) AS career_hr;
@@ -544,7 +589,14 @@ trivia_team_map = {
             SELECT p.playerID, SUM(p.p_W) AS total_wins
             FROM pitching p
             JOIN teams t ON p.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY p.playerID
             HAVING total_wins >= 300
         ) AS career_wins;
@@ -555,7 +607,14 @@ trivia_team_map = {
             SELECT b.playerID, SUM(b.b_H) AS total_hits
             FROM batting b
             JOIN teams t ON b.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY b.playerID
             HAVING total_hits >= 3000
         ) AS career_hits;
@@ -566,7 +625,14 @@ trivia_team_map = {
             SELECT p.playerID, SUM(p.p_SO) AS total_strikes
             FROM pitching p
             JOIN teams t ON p.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY p.playerID
             HAVING total_strikes >= 3000
         ) AS career_strikes;
@@ -575,19 +641,40 @@ trivia_team_map = {
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
-        WHERE t.team_name = %s AND b.b_2B >= 40;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_2B >= 40;
     """,
     "40+ HR SeasonBatting": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
-        WHERE t.team_name = %s AND b.b_HR >= 40;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_HR >= 40;
     """,
     "40+ Save SeasonPitching": """
         SELECT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
-        WHERE t.team_name = %s AND p.p_SV >= 40;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_SV >= 40;
     """,
     "500+ HR CareerBatting": """
         SELECT playerID
@@ -595,7 +682,14 @@ trivia_team_map = {
             SELECT b.playerID, SUM(b.b_HR) AS total_hr
             FROM batting b
             JOIN teams t ON b.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY b.playerID
             HAVING total_hr >= 500
         ) AS career_hr;
@@ -605,7 +699,14 @@ trivia_team_map = {
         FROM players
         WHERE (birth_country NOT IN ('USA') OR birth_state NOT IN ('AL', 'AK', ..., 'WY', 'DC'))
           AND teamID IN (
-              SELECT teamID FROM teams WHERE team_name = %s
+              SELECT teamID FROM teams WHERE franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
           );
     """,
     "Canada": """
@@ -613,7 +714,14 @@ trivia_team_map = {
         FROM players
         WHERE birth_country = 'Canada'
           AND teamID IN (
-              SELECT teamID FROM teams WHERE team_name = %s
+              SELECT teamID FROM teams WHERE franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
           );
     """,
     "Dominican Republic": """
@@ -621,27 +729,55 @@ trivia_team_map = {
         FROM players
         WHERE birth_country = 'Dominican Republic'
           AND teamID IN (
-              SELECT teamID FROM teams WHERE team_name = %s
+              SELECT teamID FROM teams WHERE franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
           );
     """,
     "Pitchedmin. 1 game": """
         SELECT DISTINCT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
-        WHERE t.team_name = %s AND p.p_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_G > 0;
     """,
     "Played In Major Negro Lgs": """
         SELECT DISTINCT n.playerID
         FROM negro_leagues n
         JOIN teams t ON n.teamID = t.teamID AND n.yearID = t.yearID
-        WHERE t.team_name = %s;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
     """,
     "Puerto Rico": """
         SELECT playerID
         FROM players
         WHERE birth_country = 'Puerto Rico'
           AND teamID IN (
-              SELECT teamID FROM teams WHERE team_name = %s
+              SELECT teamID FROM teams WHERE franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
           );
     """,
     "United States": """
@@ -649,13 +785,27 @@ trivia_team_map = {
 FROM people p
 JOIN batting b ON b.playerID = p.playerID
 JOIN teams t ON b.teamID = t.teamID
-WHERE p.birthCountry = 'USA' AND t.team_name = %s;
+WHERE p.birthCountry = 'USA' AND t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
     """,
-    "World Series Champ WS Roster": """
-        SELECT DISTINCT ws.playerID
-        FROM world_series_rosters ws
-        JOIN teams t ON ws.teamID = t.teamID AND ws.yearID = t.yearID
-        WHERE t.team_name = %s;
+    "World Series ChampWS Roster": """
+        SELECT DISTINCT playerID
+        from batting b
+        JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) AND WSWin = 'Y';
     """,
 "30+ HR /30+ SB SeasonBatting": """
         SELECT DISTINCT s.playerID
@@ -667,14 +817,28 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         ) s
         JOIN batting b ON s.playerID = b.playerID AND s.yearID = b.yearID
         JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
-        WHERE t.team_name = %s;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
     """,
  "First Round Draft Pick": """
         SELECT DISTINCT a.playerID
         FROM draft d
         JOIN batting a ON d.playerID = a.playerID
         JOIN teams t ON a.teamID = t.teamID AND d.yearID = t.yearID
-        WHERE d.round = 1 AND t.team_name = %s;
+        WHERE d.round = 1 AND t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
     """,
 "40+ WAR Career": """
     SELECT playerID
@@ -688,7 +852,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         SELECT DISTINCT a.playerID
         FROM appearances a
         JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-        WHERE t.team_name = %s
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
     );
 """,
 
@@ -696,7 +867,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
-        WHERE t.team_name = %s AND b.b_WAR >= 6;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_WAR >= 6;
     """,
     ".300+ AVG CareerBatting": """
         SELECT playerID
@@ -704,7 +882,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
             SELECT b.playerID, SUM(b.b_H) AS total_hits, SUM(b.b_AB) AS total_at_bats
             FROM batting b
             JOIN teams t ON b.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY b.playerID
             HAVING total_hits / total_at_bats > 0.300
         ) AS career_avg;
@@ -713,49 +898,105 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_H / b.b_AB > 0.300;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_H / b.b_AB > 0.300;
     """,
     "10+ HR SeasonBatting": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_HR >= 10;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_HR >= 10;
     """,
     "10+ Win SeasonPitching": """
         SELECT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID
-        WHERE t.team_name = %s AND p.p_W >= 10;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_W >= 10;
     """,
     "100+ RBI SeasonBatting": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_RBI >= 100;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_RBI >= 100;
     """,
     "100+ Run SeasonBatting": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_R >= 100;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_R >= 100;
     """,
     "20+ Win SeasonPitching": """
         SELECT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID
-        WHERE t.team_name = %s AND p.p_W >= 20;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_W >= 20;
     """,
     "200+ Hits SeasonBatting": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_H >= 200;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_H >= 200;
     """,
     "200+ K SeasonPitching": """
         SELECT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID
-        WHERE t.team_name = %s AND p.p_SO >= 200;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_SO >= 200;
     """,
     "200+ Wins CareerPitching": """
         SELECT playerID
@@ -763,7 +1004,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
             SELECT p.playerID, SUM(p.p_W) AS total_wins
             FROM pitching p
             JOIN teams t ON p.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY p.playerID
             HAVING total_wins >= 200
         ) AS career_wins;
@@ -774,7 +1022,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
             SELECT b.playerID, SUM(b.b_H) AS total_hits
             FROM batting b
             JOIN teams t ON b.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY b.playerID
             HAVING total_hits >= 2000
         ) AS career_hits;
@@ -791,24 +1046,30 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         SELECT DISTINCT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
-        WHERE t.team_name = %s
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
     );
 """,
 
-    "All Star": """
+    "Cy Young": """
       SELECT DISTINCT ap.playerID
       FROM awards ap
       JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
       JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID like '%All-Star' AND t.team_name = %s;
-  """,
-
-    "Cy Young": """
-      SELECT DISTINCT ap.playerID
-      FROM awardsplayers ap
-      JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
-      JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID = 'Cy Young Award' AND t.team_name = %s;
+      WHERE ap.awardID = 'Cy Young Award' AND t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
   """,
 
     "Gold Glove": """
@@ -816,7 +1077,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
       FROM awards ap
       JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
       JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID = 'Gold Glove' AND t.team_name = %s;
+      WHERE ap.awardID = 'Gold Glove' AND t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
   """,
 
     "MVP": """
@@ -824,134 +1092,251 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
       FROM awards ap
       JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
       JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID = 'Most Valuable Player' AND t.team_name = %s;
+      WHERE ap.awardID = 'Most Valuable Player' AND t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
   """,
 
     "Rookie of the Year": """
       SELECT DISTINCT ap.playerID
-      FROM awardsplayers ap
+      FROM awards ap
       JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
       JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID = 'Rookie of the Year' AND t.team_name = %s;
+      WHERE ap.awardID = 'Rookie of the Year' AND t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) ;
   """,
 
     "Silver Slugger": """
       SELECT DISTINCT ap.playerID
-      FROM awardsplayers ap
-      JOIN appearances a ON ap.playerID = a.playerID AND ap.yearID = a.yearID
-      JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE ap.awardID = 'Silver Slugger' AND t.team_name = %s;
+      FROM awards ap
+      JOIN batting a ON ap.playerID = a.playerID
+      JOIN teams t ON a.teamID = t.teamID
+      WHERE ap.awardID = 'Silver Slugger' AND t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND ap.yearid = t.yearid and a.yearid = t.yearid and ap.playerid != 'stantmi03';
   """,
 
     "Hall of Fame": """
       SELECT DISTINCT h.playerID
       FROM halloffame h
       JOIN appearances a ON h.playerID = a.playerID
-      JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-      WHERE t.team_name = %s AND h.inducted = 'Y';
-  """,
-
-    # For "Threw a No-Hitter", since it's a specific event, we need to ensure the data reflects that.
-    # Assuming you have a 'nohitters' table:
-    "Threw a No-Hitter": """
-      SELECT DISTINCT nh.playerID
-      FROM nohitters nh
-      JOIN teams t ON nh.teamID = t.teamID AND nh.yearID = t.yearID
-      WHERE t.team_name = %s;
+      JOIN teams t ON a.teamID = t.teamID
+      WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND h.inducted = 'Y';
   """,
 
     "Threw a No-Hitter": """
       SELECT DISTINCT p.playerID
       FROM pitching p
       JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
-      WHERE t.team_name = %s AND p.p_NO != 0;
+      WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_NO != 0;
   """,
 
     "30+ HR / 30+ SB SeasonBatting": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_HR >= 30 AND b.b_SB >= 30;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_HR >= 30 AND b.b_SB >= 30;
     """,
     "30+ HR SeasonBatting": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_HR >= 30;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_HR >= 30;
     """,
     "30+ SB Season": """
         SELECT b.playerID
         FROM batting b
         JOIN teams t ON b.teamID = t.teamID
-        WHERE t.team_name = %s AND b.b_SB >= 30;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND b.b_SB >= 30;
     """,
     "30+ Save SeasonPitching": """
         SELECT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID
-        WHERE t.team_name = %s AND p.p_SV >= 30;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_SV >= 30;
     """,
     "Played Catchermin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = 'C' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = 'C' AND f.f_G > 0;
     """,
 
     "Played First Basemin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = '1B' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = '1B' AND f.f_G > 0;
     """,
 
     "Played Second Basemin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = '2B' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = '2B' AND f.f_G > 0;
     """,
 
     "Played Third Basemin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = '3B' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = '3B' AND f.f_G > 0;
     """,
 
     "Played Shortstopmin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = 'SS' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = 'SS' AND f.f_G > 0;
     """,
 
     "Played Left Fieldmin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = 'LF' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = 'LF' AND f.f_G > 0;
     """,
 
     "Played Center Fieldmin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = 'CF' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = 'CF' AND f.f_G > 0;
     """,
 
     "Played Right Fieldmin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = 'RF' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = 'RF' AND f.f_G > 0;
     """,
 
     "Played Outfieldmin. 1 game": """
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position IN ('LF', 'CF', 'RF') AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position IN ('LF', 'CF', 'RF') AND f.f_G > 0;
     """,
 
     # If you have a trivia for "Played Designated Hittermin. 1 game":
@@ -959,7 +1344,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         SELECT f.playerID
         FROM fielding f
         JOIN teams t ON f.teamID = t.teamID AND f.yearID = t.yearID
-        WHERE t.team_name = %s AND f.position = 'DH' AND f.f_G > 0;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND f.position = 'DH' AND f.f_G > 0;
     """,
     "≤ 3.00 ERA CareerPitching": """
         SELECT playerID
@@ -967,7 +1359,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
             SELECT p.playerID, SUM(p.p_ER) / (SUM(p.p_IPOuts) / 3) AS era
             FROM pitching p
             JOIN teams t ON p.teamID = t.teamID
-            WHERE t.team_name = %s
+            WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
             GROUP BY p.playerID
             HAVING era <= 3.00
         ) AS career_era;
@@ -976,7 +1375,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         SELECT p.playerID
         FROM pitching p
         JOIN teams t ON p.teamID = t.teamID
-        WHERE t.team_name = %s AND p.p_ER / (p.p_IPOuts / 3) <= 3.00;
+        WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )  AND p.p_ER / (p.p_IPOuts / 3) <= 3.00;
     """,
 "Only One Team": """
         SELECT a.playerID
@@ -985,7 +1391,14 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
         HAVING SUM(CASE WHEN a.teamID NOT IN (
             SELECT DISTINCT teamID
             FROM teams
-            WHERE team_name = %s
+            WHERE franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    ) 
         ) THEN 1 ELSE 0 END) = 0;
     """,
 }
@@ -993,10 +1406,13 @@ WHERE p.birthCountry = 'USA' AND t.team_name = %s;
 
 
 # Function to solve the puzzle
-def solve_puzzle():
-    # Scrape the grid
+def solve_puzzle(puzzle_number=None):
+    """
+    Solve the puzzle for the given puzzle number. If no puzzle number is provided,
+    solve the current day's puzzle.
+    """
     selected_player_ids = set()
-    top_row, left_column = scrape_immaculate_grid()
+    top_row, left_column = scrape_immaculate_grid(puzzle_number)
 
     # Ensure we have 3x3 grid values
     if len(top_row) != 3 or len(left_column) != 3:
@@ -1057,6 +1473,7 @@ def solve_puzzle():
 
     return top_row, left_column, grid
 
+
 # Define the Flask route
 
 def get_oldest_player(player_ids, selected_player_ids):
@@ -1104,19 +1521,55 @@ def get_oldest_player(player_ids, selected_player_ids):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    """
+    Load and solve the grid puzzle. By default, load the current day's puzzle.
+    """
+    puzzle_number = None  # Default to the current day's puzzle
+
     if request.method == 'POST':
-        # The user clicked the 'Solve' button
-        top_row, left_column, grid = solve_puzzle()
-        return render_template('index.html', top_row=top_row, left_column=left_column, grid=grid)
-    else:
-        # GET request, render the page with empty grid
-        top_row, left_column = scrape_immaculate_grid()
-        if len(top_row) != 3 or len(left_column) != 3:
-            print("Error: Grid scraping did not produce a 3x3 grid.")
-            grid = [["Error"]] * 3
-        else:
+        # Get the puzzle number from the form input, if provided
+        puzzle_number = request.form.get('puzzle_number')
+        if puzzle_number:
+            try:
+                puzzle_number = int(puzzle_number)
+            except ValueError:
+                puzzle_number = None  # Fallback to the current day's puzzle
+
+        action = request.form.get('action')
+
+        if action == 'solve_puzzle':
+            # Solve the puzzle
+            top_row, left_column, grid = solve_puzzle(puzzle_number)
+            return render_template(
+                'index.html',
+                puzzle_number=puzzle_number,
+                top_row=top_row,
+                left_column=left_column,
+                grid=grid
+            )
+        elif action == 'load_puzzle':
+            # Load a specific puzzle
+            top_row, left_column = scrape_immaculate_grid(puzzle_number)
             grid = [["" for _ in range(3)] for _ in range(3)]
-        return render_template('index.html', top_row=top_row, left_column=left_column, grid=grid)
+            return render_template(
+                'index.html',
+                puzzle_number=puzzle_number,
+                top_row=top_row,
+                left_column=left_column,
+                grid=grid
+            )
+    else:
+        # GET request, load the current day's puzzle
+        top_row, left_column = scrape_immaculate_grid()
+        grid = [["" for _ in range(3)] for _ in range(3)]
+        return render_template(
+            'index.html',
+            puzzle_number=None,
+            top_row=top_row,
+            left_column=left_column,
+            grid=grid
+        )
+
 
 if __name__ == '__main__':
     app.run(debug=True)
