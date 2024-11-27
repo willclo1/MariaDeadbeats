@@ -17,6 +17,7 @@ from tableActions.seriesPostActions import fillSeriesPost
 from tableActions.teamActions import fillTeams
 from tableActions.DraftActions import fillDraft
 from tableActions.create_users_table import create_users_table
+from tableActions.addGuestUser import create_guest_user
 
 def updateDB():
     try:
@@ -39,6 +40,7 @@ def updateDB():
         fillDraft()
         fillTeams()
         create_users_table()
+        create_guest_user()
     except Exception as e:
         print(e)
     finally:

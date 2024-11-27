@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.sync import update
@@ -7,6 +7,15 @@ from Tables.Batting import Batting
 from cfg import engineStr
 from tableActions.csvActions import getNewData, getAllData
 
+def add_column_to_batting():
+    engine = create_engine(engineStr)
+    with engine.connect() as conn:
+        try:
+            # Add the b_WAR column to the Batting table
+            conn.execute(text("ALTER TABLE Batting ADD COLUMN b_WAR FLOAT"))
+            print("Column 'b_WAR' added successfully to the Batting table.")
+        except Exception as e:
+            print(f"An error occurred while altering the table: {e}")
 
 def fillBatting():
 
@@ -15,6 +24,7 @@ def fillBatting():
     session = Session()
 
     try:
+        add_column_to_batting()
         currData = getNewData("lahman_1871-2023_csv/Batting.csv")
 
         warData = getAllData("lahman_1871-2023_csv/jeffbagwell_war_historical_2023.csv")
