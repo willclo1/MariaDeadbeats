@@ -344,7 +344,7 @@ def get_players_for_trivia(trivia):
         "Designated Hittermin. 1 game": "SELECT playerID FROM appearances WHERE G_dh > 0;",
         "Dominican Republic": "SELECT playerID FROM people WHERE birthCountry = 'Dominican Republic';",
         "Gold Glove": "SELECT playerID FROM awards WHERE awardID = 'Gold Glove';",
-        "Hall of Fame": "SELECT playerID FROM halloffame;",
+        "Hall of Fame": "SELECT playerID FROM halloffame where inducted = 'Y';",
         "MVP": "SELECT playerID FROM awards WHERE awardID = 'Most Valuable Player';",
         "Only One Team": """
             SELECT playerID
