@@ -19,6 +19,7 @@ from tableActions.teamActions import fillTeams
 from tableActions.DraftActions import fillDraft
 from tableActions.create_users_table import create_users_table
 from tableActions.addGuestUser import create_guest_user
+from tableActions.create_banned_users_table import create_banned_users_table
 
 def updateDB():
     try:
@@ -43,6 +44,7 @@ def updateDB():
         fillTeams()
         create_users_table()
         create_guest_user()
+        create_banned_users_table()
     except Exception as e:
         print(e)
     finally:

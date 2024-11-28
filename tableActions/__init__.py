@@ -16,3 +16,4 @@ from .fieldingPostActions import fillFieldingPost
 from .homeGamesActions import fillHomeGame
 from .managersActions import fillManagers
 from .create_users_table import create_users_table
+from .create_banned_users_table import create_banned_users_table
