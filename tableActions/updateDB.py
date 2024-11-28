@@ -1,4 +1,5 @@
 from tableActions import fillFielding
+from tableActions.create_draft_table import create_draft_table
 from tableActions.peopleActions import fillPeople
 from tableActions.allStarFullActions import fillAllStartFull
 from tableActions.appearancesActions import fillAppearances
@@ -37,6 +38,7 @@ def updateDB():
         fillPitching()
         fillPostPitching()
         fillSeriesPost()
+        create_draft_table()
         fillDraft()
         fillTeams()
         create_users_table()
