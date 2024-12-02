@@ -31,7 +31,7 @@ def create_guest_user():
         print(f"User '{GUEST_USERNAME}' created successfully.")
 
         # Grant the user permissions
-        grant_user_sql = f"GRANT SELECT, INSERT, UPDATE ON {DATABASE_NAME}.* TO '{GUEST_USERNAME}'@'localhost';"
+        grant_user_sql = f"GRANT SELECT, INSERT, UPDATE, DELETE ON {DATABASE_NAME}.* TO '{GUEST_USERNAME}'@'localhost';"
         execute_sql(engine, grant_user_sql)
         print(f"User '{GUEST_USERNAME}' successfully granted permissions.")
 
