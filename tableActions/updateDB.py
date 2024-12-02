@@ -21,6 +21,7 @@ from tableActions.create_users_table import create_users_table
 from tableActions.addGuestUser import create_guest_user
 from tableActions.create_banned_users_table import create_banned_users_table
 from tableActions.alterParks import create_parks_columns, update_lat_longitude
+from tableActions.addAdmin import create_admin_user
 
 
 def updateDB():
@@ -49,6 +50,7 @@ def updateDB():
         create_users_table()
         create_guest_user()
         create_banned_users_table()
+        create_admin_user()
     except Exception as e:
         print(e)
     finally:
