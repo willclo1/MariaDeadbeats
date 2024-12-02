@@ -1,4 +1,4 @@
-from sqlalchemy import Column, VARCHAR
+from sqlalchemy import Column, VARCHAR, Float
 from sqlalchemy.orm import DeclarativeBase
 
 class Base(DeclarativeBase):
@@ -12,3 +12,5 @@ class Parks(Base):
     city = Column(VARCHAR(255), nullable=True)
     state = Column(VARCHAR(255), nullable=True)
     country = Column(VARCHAR(255), nullable=True)
+    latitude = Column(Float, nullable=True)
+    longitude = Column(Float, nullable=True)

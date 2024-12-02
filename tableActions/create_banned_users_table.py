@@ -19,3 +19,4 @@ def create_banned_users_table():
 
     finally:
         session.close()
+create_banned_users_table()
