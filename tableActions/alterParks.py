@@ -1,7 +1,7 @@
 from requests.adapters import HTTPAdapter
 from sqlalchemy import create_engine, text
 from urllib3 import Retry
-from cfg import engineStr
+from cfg import engineStr, API_KEY
 import requests
 
 def create_parks_columns():
@@ -15,8 +15,6 @@ def create_parks_columns():
         except Exception as e:
             print(f"An error occurred while altering the table: {e}")
 
-
-API_KEY = "AIzaSyD_0DLUddBAgE3IuRWlp7HBQgTu0qq2Kik"
 
 def get_coordinates(address):
     url = "https://maps.googleapis.com/maps/api/geocode/json"
