@@ -13,7 +13,7 @@ def execute_sql(engine, statement):
 def create_admin_user():
     ADMIN_USER_USERNAME = 'admin'
     ADMIN_USER_EMAIL = 'admin@admin.com'
-    ADMIN_USER_PASSWORD = 'guestPassword123'
+    ADMIN_USER_PASSWORD = 'pass'
     ADMIN_USER_PASSWORD_HASH = generate_password_hash(ADMIN_USER_PASSWORD)
 
     engine = create_engine(engineStr)
