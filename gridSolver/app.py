@@ -366,7 +366,7 @@ def get_players_for_trivia(trivia):
         "Played Second Basemin. 1 game": "SELECT playerID FROM appearances WHERE G_2b > 0;",
         "Played Shortstopmin. 1 game": "SELECT playerID FROM appearances WHERE G_ss > 0;",
         "Played Third Basemin. 1 game": "SELECT playerID FROM appearances WHERE G_3b > 0;",
-        "Puerto Rico": "SELECT playerID FROM people WHERE birthCountry = 'Puerto Rico';",
+        "Puerto Rico": "SELECT playerID FROM people WHERE birthCountry = 'Puerto Rico' or birthCountry = 'P.R.';",
         "Rookie of the Year": "SELECT playerID FROM awards WHERE awardID = 'Rookie of the Year Award';",
         "Silver Slugger": "SELECT playerID FROM awards WHERE awardID = 'Silver Slugger';",
         "Threw a No-Hitter": "SELECT playerID FROM pitching WHERE p_SHO > 0;",  # Approximation
@@ -760,7 +760,7 @@ trivia_team_map = {
     "Puerto Rico": """
             SELECT playerID
             FROM players
-            WHERE birthCountry = 'Puerto Rico'
+            WHERE birthCountry = 'Puerto Rico' or birthCountry = 'P.R.'
               AND teamID IN (
                   SELECT teamID FROM teams WHERE franchid = (
             SELECT franchid
