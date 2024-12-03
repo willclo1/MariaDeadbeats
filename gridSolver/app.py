@@ -243,9 +243,12 @@ def get_players_for_trivia(trivia):
             WHERE birthCountry = 'USA';
         """,
         "World Series Champ WS Roster": """
-            SELECT DISTINCT playerID
-            FROM world_series_rosters;
-        """,
+        SELECT DISTINCT a.playerID
+        FROM appearances a
+        JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+        WHERE t.WSWin = 'Y'
+          AND t.yearID >= 1884;
+    """,
         ".300+ AVG SeasonBatting": "SELECT playerID FROM batting WHERE b_H / b_AB > 0.300;",
         "10+ HR SeasonBatting": "SELECT playerID FROM batting WHERE b_HR >= 10;",
         "10+ Win SeasonPitching": "SELECT playerID FROM pitching WHERE p_W >= 10;",
@@ -368,13 +371,6 @@ def get_players_for_trivia(trivia):
         "Silver Slugger": "SELECT playerID FROM awards WHERE awardID = 'Silver Slugger';",
         "Threw a No-Hitter": "SELECT playerID FROM pitching WHERE p_SHO > 0;",  # Approximation
         "United States": "SELECT playerID FROM people WHERE birthCountry = 'USA';",
-        "World Series Champ WS Roster": """
-            SELECT DISTINCT playerID
-            FROM seriespost
-            WHERE round = 'WS' AND teamID IN (
-                SELECT teamID FROM teams WHERE WSWin = 'Y'
-            );
-        """,
         "≤ 3.00 ERA CareerPitching": """
             SELECT playerID
             FROM (
@@ -791,18 +787,21 @@ trivia_team_map = {
         ) ;
         """,
     "World Series ChampWS Roster": """
-            SELECT DISTINCT playerID
-            from batting b
-            JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
-            WHERE t.franchid = (
-            SELECT franchid
-            FROM teams
-            WHERE team_name = %s and t.yearid > 1902
-            GROUP BY franchid
-            ORDER BY COUNT(*) DESC
-            LIMIT 1
-        ) AND WSWin = 'Y';
-        """,
+        SELECT DISTINCT a.playerID
+        FROM appearances a
+        JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+        JOIN battingpost bp ON a.playerID = bp.playerID AND a.teamID = bp.teamID AND a.yearID = bp.yearID
+        WHERE t.WSWin = 'Y'
+          AND t.yearID >= 1884
+          AND t.franchID = (
+              SELECT franchID
+              FROM teams
+              WHERE team_name = %s
+              ORDER BY yearID DESC
+              LIMIT 1
+          )
+          AND bp.b_G > 0;
+    """,
     "30+ HR /30+ SB SeasonBatting": """
             SELECT DISTINCT s.playerID
             FROM (
