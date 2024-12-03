@@ -242,7 +242,7 @@ def get_players_for_trivia(trivia):
             FROM people
             WHERE birthCountry = 'USA';
         """,
-        "World Series Champ WS Roster": """
+        "World Series ChampWS Roster": """
         SELECT DISTINCT a.playerID
         FROM appearances a
         JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
