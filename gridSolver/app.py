@@ -550,6 +550,50 @@ trivia_team_map = {
             LIMIT 1
         ) ;
         """,
+    "40+ 2B SeasonBatting": """
+        SELECT b.playerID
+        FROM batting b
+        JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
+        WHERE t.franchid = (
+            SELECT franchid
+            FROM teams
+            WHERE team_name = %s
+            GROUP BY franchid
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+        )
+        AND b.b_2B >= 40;
+    """,
+
+    "40+ HR SeasonBatting": """
+        SELECT b.playerID
+        FROM batting b
+        JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
+        WHERE t.franchid = (
+            SELECT franchid
+            FROM teams
+            WHERE team_name = %s
+            GROUP BY franchid
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+        )
+        AND b.b_HR >= 40;
+    """,
+
+    "40+ Save SeasonPitching": """
+        SELECT p.playerID
+        FROM pitching p
+        JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
+        WHERE t.franchid = (
+            SELECT franchid
+            FROM teams
+            WHERE team_name = %s
+            GROUP BY franchid
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+        )
+        AND p.p_SV >= 40;
+    """,
     "300+ HR CareerBatting": """
             SELECT playerID
             FROM (
