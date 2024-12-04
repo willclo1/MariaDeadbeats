@@ -1409,40 +1409,38 @@ WHERE p.birthCountry != 'USA'
         )  AND f.position = 'DH' AND f.f_G > 0;
         """,
     "≤ 3.00 ERA CareerPitching": """
-            SELECT playerID
-            FROM (
-                SELECT p.playerID, SUM(p.p_ER) / (SUM(p.p_IPOuts) / 3) AS era
-                FROM pitching p
-                GROUP BY p.playerID
-                HAVING era <= 3.00
-            ) AS career_era
-            WHERE playerID IN (
-                SELECT DISTINCT p.playerID
-                FROM pitching p
-                JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
-                WHERE t.franchid = (
-                    SELECT franchid
-                    FROM teams
-                    WHERE team_name = %s
-                    GROUP BY franchid
-                    ORDER BY COUNT(*) DESC
-                    LIMIT 1
-                )
-            );
-        """,
+        SELECT playerID
+        FROM pitching
+        WHERE p_era <= 3.00
+          AND playerID IN (
+              SELECT DISTINCT p.playerID
+              FROM pitching p
+              JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
+              WHERE t.franchid = (
+                  SELECT franchid
+                  FROM teams
+                  WHERE team_name = %s
+                  GROUP BY franchid
+                  ORDER BY COUNT(*) DESC
+                  LIMIT 1
+              )
+          );
+    """,
+
     "≤ 3.00 ERA Season": """
-            SELECT p.playerID
-            FROM pitching p
-            JOIN teams t ON p.teamID = t.teamID
-            WHERE t.franchid = (
+        SELECT p.playerID
+        FROM pitching p
+        JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
+        WHERE t.franchid = (
             SELECT franchid
             FROM teams
             WHERE team_name = %s
             GROUP BY franchid
             ORDER BY COUNT(*) DESC
             LIMIT 1
-        )  AND p.p_ER / (p.p_IPOuts / 3) <= 3.00;
-        """,
+        )
+        AND p.p_era <= 3.00;
+    """,
     "Only One Team": """
             SELECT a.playerID
             FROM appearances a
