@@ -4,8 +4,9 @@ from sqlalchemy.sql.sqltypes import NULLTYPE
 from Tables.Managers import Managers
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from cfg import engineStr
-from tableActions.csvActions import getNewData
+from .cfg import engineStr
+from .csvActions import getNewData
+import os
 
 def fillManagers():
 
@@ -14,7 +15,9 @@ def fillManagers():
     session = Session()
 
     try:
-        currData = getNewData("lahman_1871-2023_csv/Managers.csv")
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'Managers.csv')
+        currData = getNewData(batting_post_csv_path)
 
         for row in currData:
             new_record = Managers(

@@ -2,8 +2,9 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from Tables.Pitching import Pitching
 from Tables.People import People  # Assuming you have a People table model
-from cfg import engineStr
-from tableActions.csvActions import getPeopleData, getNewData, getAllData
+from .cfg import engineStr
+from .csvActions import getPeopleData, getNewData, getAllData
+import os
 
 
 def add_column_to_pitching():
@@ -22,12 +23,16 @@ def fillPitching():
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    pitching_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'Pitching.csv')
+    war_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'jeffbagwell_war_historical_2023.csv')
+    no_hitter_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'no_hitters_and_perfect_games.csv')
 
     try:
         add_column_to_pitching()
-        currData = getNewData("lahman_1871-2023_csv/Pitching.csv")
-        warData = getAllData("lahman_1871-2023_csv/jeffbagwell_war_historical_2023.csv")
-        noHitterData = getAllData("lahman_1871-2023_csv/no_hitters_and_perfect_games.csv")
+        currData = getNewData(pitching_csv_path)
+        warData = getAllData(war_csv_path)
+        noHitterData = getAllData(no_hitter_csv_path)
 
         # Add current pitching data
         for row in currData:

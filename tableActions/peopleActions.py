@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Tables.People import People
-from cfg import engineStr
-from tableActions.csvActions import getPeopleData
+from .cfg import engineStr
+from .csvActions import getPeopleData
 from datetime import datetime
+import os
 
 
 def parse_date(date_str):
@@ -19,8 +20,10 @@ def fillPeople():
     session = Session()
 
     try:
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'People.csv')
+        currData = getPeopleData(batting_post_csv_path)
 
-        currData = getPeopleData("lahman_1871-2023_csv/People.csv")
 
         for row in currData:
             new_person = People(

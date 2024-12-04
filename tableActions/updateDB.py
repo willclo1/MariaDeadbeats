@@ -1,7 +1,6 @@
-from sqlalchemy import create_engine, text
+
 
 from tableActions import fillFielding
-from tableActions.cfg import engineStr
 from tableActions.create_draft_table import create_draft_table
 from tableActions.peopleActions import fillPeople
 from tableActions.allStarFullActions import fillAllStartFull

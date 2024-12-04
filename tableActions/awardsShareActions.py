@@ -3,8 +3,9 @@ from sklearn.utils.fixes import percentile
 from Tables.awardsShare import AwardsShare
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from cfg import engineStr
-from tableActions.csvActions import getNewData
+from .cfg import engineStr
+from .csvActions import getNewData
+import os
 
 
 def fillAwardsShare():
@@ -13,9 +14,17 @@ def fillAwardsShare():
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
-        currData = getNewData("lahman_1871-2023_csv/AwardsSharePlayers.csv")
-        additionalAwardsData = getNewData("lahman_1871-2023_csv/AwardsShareManagers.csv")
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+        # Construct the absolute paths for the CSV files
+        awards_share_players_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'AwardsSharePlayers.csv')
+        awards_share_managers_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'AwardsShareManagers.csv')
+
+        # Load data using absolute paths
+        currData = getNewData(awards_share_players_csv_path)
+        additionalAwardsData = getNewData(awards_share_managers_csv_path)
+
+        # Combine the data
         totalData = additionalAwardsData + currData
 
         for row in totalData:
