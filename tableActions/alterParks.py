@@ -38,6 +38,7 @@ def get_coordinates(address):
 
 def update_lat_longitude():
     engine = create_engine(engineStr)
+    create_parks_columns()
     with engine.connect() as conn:
         try:
             result = conn.execute(text("SELECT parkID, park_name, city, state, country FROM parks WHERE latitude IS NULL OR longitude IS NULL"))
@@ -61,5 +62,3 @@ def update_lat_longitude():
             print(f"An error occurred: {e}")
 
         conn.commit()
-
-update_lat_longitude()

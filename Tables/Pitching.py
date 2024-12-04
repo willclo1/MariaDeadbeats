@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, Column, SmallInteger, CHAR, VARCHAR, Double
+from sqlalchemy import Integer, Column, SmallInteger, CHAR, VARCHAR, Double, Float, Boolean
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import DeclarativeBase
 
@@ -37,3 +37,5 @@ class Pitching(Base):
     p_SH = Column(SmallInteger, nullable=True)
     p_SF = Column(SmallInteger, nullable=True)
     p_GIDP = Column(SmallInteger, nullable=True)
+    p_WAR = Column(Float, nullable=True)
+    p_NH = Column(Boolean, default=False, nullable=False)
