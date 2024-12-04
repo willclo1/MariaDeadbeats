@@ -89,7 +89,7 @@ WHERE t.franchid = (
     GROUP BY franchid
     ORDER BY COUNT(*) DESC
     LIMIT 1
-);
+) and t.team_name != 'Washington Senators';
 
 
     """
@@ -731,19 +731,23 @@ trivia_team_map = {
            );
         """,
     "Born Outside US 50 States and DC": """
-            SELECT playerID
-            FROM players
-            WHERE (birthCountry NOT IN ('USA', 'US'))
-              AND teamID IN (
-                  SELECT teamID FROM teams WHERE franchid = (
-            SELECT franchid
-            FROM teams
-            WHERE team_name = %s
-            GROUP BY franchid
-            ORDER BY COUNT(*) DESC
-            LIMIT 1
-        ) 
-              );
+            SELECT DISTINCT p.playerID
+FROM people p
+JOIN appearances a ON p.playerID = a.playerID
+WHERE p.birthCountry != 'USA'
+  AND a.teamID IN (
+      SELECT teamID 
+      FROM teams 
+      WHERE franchid = (
+          SELECT franchid
+          FROM teams
+          WHERE team_name = %s
+          GROUP BY franchid
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+      )
+  );
+
         """,
     "Canada": """
             SELECT playerID
