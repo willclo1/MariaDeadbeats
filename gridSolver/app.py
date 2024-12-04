@@ -372,15 +372,17 @@ def get_players_for_trivia(trivia):
         "Threw a No-Hitter": "SELECT playerID FROM pitching WHERE p_SHO > 0;",  # Approximation
         "United States": "SELECT playerID FROM people WHERE birthCountry = 'USA';",
         "≤ 3.00 ERA CareerPitching": """
-            SELECT playerID
-            FROM (
-                SELECT playerID, SUM(p_ER) / (SUM(p_IPOuts) / 3) AS era
-                FROM pitching
-                GROUP BY playerID
-                HAVING era <= 3.00
-            ) AS career_era;
-        """,
-        "≤ 3.00 ERA Season": "SELECT playerID FROM pitching WHERE p_ER / (p_IPOuts / 3) <= 3.00;",
+    SELECT playerID
+    FROM pitching
+    WHERE career_p_era <= 3.00;
+""",
+
+        "≤ 3.00 ERA Season": """
+    SELECT DISTINCT playerID
+    FROM pitching
+    WHERE p_era <= 3.00;
+"""
+,
     }
 
     normalized_trivia = normalize_input(trivia)
