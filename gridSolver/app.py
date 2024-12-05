@@ -79,17 +79,18 @@ def get_players_for_team(team_name):
     # Query players by franchID
     team_name = normalize_team_name(team_name)
     query = """
-    SELECT DISTINCT a.playerID
+  SELECT DISTINCT a.playerID
 FROM appearances a
 JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
 WHERE t.franchid = (
     SELECT franchid
     FROM teams
     WHERE team_name = %s
-    GROUP BY franchid
-    ORDER BY COUNT(*) DESC
+      AND team_name != 'Washington Senators'
+    ORDER BY yearID DESC
     LIMIT 1
-) and t.team_name != 'Washington Senators';
+);
+
 
 
     """
@@ -369,7 +370,11 @@ def get_players_for_trivia(trivia):
         "Puerto Rico": "SELECT playerID FROM people WHERE birthCountry = 'Puerto Rico' or birthCountry = 'P.R.';",
         "Rookie of the Year": "SELECT playerID FROM awards WHERE awardID = 'Rookie of the Year';",
         "Silver Slugger": "SELECT playerID FROM awards WHERE awardID = 'Silver Slugger';",
-        "Threw a No-Hitter": "SELECT playerID FROM pitching WHERE p_SHO > 0;",  # Approximation
+        "Threw a No‑Hitter": """
+        SELECT DISTINCT playerID
+        FROM pitching
+        WHERE p_NH > 0;
+        """,
         "United States": "SELECT playerID FROM people WHERE birthCountry = 'USA';",
         "≤ 3.00 ERA CareerPitching": """
     SELECT playerID
@@ -888,10 +893,10 @@ WHERE p.birthCountry != 'USA'
     "40+ WAR Career": """
         SELECT playerID
         FROM (
-            SELECT b.playerID, SUM(b.b_WAR) AS career_war
-            FROM batting b
+            SELECT b.playerID, SUM(b.b_WAR) AS career_war, SUM(p.p_WAR) AS carrer_war_pitching
+            FROM batting b, pitching p
             GROUP BY b.playerID
-            HAVING career_war >= 40
+            HAVING career_war >= 40 or carrer_war_pitching >= 40
         ) AS career_war_table
         WHERE playerID IN (
             SELECT DISTINCT a.playerID
@@ -910,7 +915,7 @@ WHERE p.birthCountry != 'USA'
 
     "6+ WAR Season": """
             SELECT b.playerID
-            FROM batting b
+            FROM batting b, pitching p
             JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
             WHERE t.franchid = (
             SELECT franchid
@@ -919,7 +924,7 @@ WHERE p.birthCountry != 'USA'
             GROUP BY franchid
             ORDER BY COUNT(*) DESC
             LIMIT 1
-        )  AND b.b_WAR >= 6;
+        )  AND (b.b_WAR >= 6 OR p.p_WAR >= 6);
         """,
     ".300+ AVG CareerBatting": """
             SELECT playerID
@@ -1204,18 +1209,22 @@ WHERE p.birthCountry != 'USA'
         )  AND h.inducted = 'Y';
       """,
 
-    "Threw a No-Hitter": """
+    "Threw a No‑Hitter": """
           SELECT DISTINCT p.playerID
-          FROM pitching p
-          JOIN teams t ON p.teamID = t.teamID AND p.yearID = t.yearID
-          WHERE t.franchid = (
-            SELECT franchid
-            FROM teams
-            WHERE team_name = %s
-            GROUP BY franchid
-            ORDER BY COUNT(*) DESC
-            LIMIT 1
-        )  AND p.p_NO != 0;
+FROM pitching p
+WHERE EXISTS (
+    SELECT 1
+    FROM teams t
+    WHERE t.teamID = p.teamID
+      AND t.franchid = (
+          SELECT franchid
+          FROM teams
+          WHERE team_name = %s
+          ORDER BY yearID DESC
+          LIMIT 1
+      )
+) AND p.p_NH > 0;
+
       """,
 
     "30+ HR / 30+ SB SeasonBatting": """
@@ -1551,12 +1560,12 @@ def get_rarest_player(player_ids, selected_player_ids):
     placeholders = ','.join(['%s'] * len(player_ids_tuple))
 
     query = f"""
-    SELECT a.playerID, SUM(a.G_all) AS total_games
-    FROM appearances a
-    WHERE a.playerID IN ({placeholders})
-    GROUP BY a.playerID
-    ORDER BY total_games ASC
-    LIMIT 1
+        SELECT a.playerID, SUM(a.G_all) AS total_games
+        FROM appearances a
+        WHERE a.playerID IN ({placeholders})
+        GROUP BY a.playerID
+        ORDER BY total_games ASC, a.playerID ASC
+        LIMIT 1
     """
     params = player_ids_tuple
 
