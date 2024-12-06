@@ -1,7 +1,8 @@
 
 
-from tableActions import fillFielding
+from tableActions import fillFielding, create_admin_user
 from tableActions.create_draft_table import create_draft_table
+from tableActions.negroLeagueActions import update_negro_league_table
 from tableActions.peopleActions import fillPeople
 from tableActions.allStarFullActions import fillAllStartFull
 from tableActions.appearancesActions import fillAppearances
@@ -35,7 +36,7 @@ def updateDB():
             fillHallOfFame, fillHomeGame, fillManagers,
             fillPostPitching, fillSeriesPost, create_draft_table,
             fillDraft, fillTeams, create_users_table, create_guest_user,
-            create_banned_users_table
+            create_banned_users_table, update_negro_league_table, create_admin_user
         ]
         for step in steps:
             print(f"Running: {step.__name__}")

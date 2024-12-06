@@ -158,3 +158,6 @@ def scrape_no_hitters_to_csv(url, output_csv):
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+

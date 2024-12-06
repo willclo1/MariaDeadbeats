@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from Tables.collegePlaying import CollegePlaying
 from .cfg import engineStr
 from .csvActions import getNewData
+import os
 
 def fillCollegePlaying():
 
