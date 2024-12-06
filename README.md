@@ -1,35 +1,27 @@
-# MariaDeadbeats: Comprehensive Database Management Guide
-
-Welcome to the **MariaDeadbeats** project! This guide provides detailed steps for updating your database and running the associated Flask application, along with an overview of the database updates and their functionalities.
-
----
+# **MariaDeadbeats: Database Setup and Flask App Guide**
 
 ## **Update Database (Python - Long Way)**
 
-### Step-by-Step Instructions
+### **Step-by-Step Instructions**
 
 1. Clone the repository:
    ```bash
    git clone https://github.com/willclo1/MariaDeadbeats.git
    ```
-
-2. Log into your MariaDB server:
+2. Log into your MariaDB server using the shell:
    ```bash
    mysql -u your_username -p
    ```
-
 3. Create a new empty database:
    ```sql
    CREATE DATABASE MariaDeadbeats;
    ```
-
-4. Navigate to the `MariaDeadbeats` database:
+4. Switch to the `MariaDeadbeats` database:
    ```sql
    USE MariaDeadbeats;
    ```
-
-5. Run the provided SQL file to initialize the database:
-   - **Mac/Linux**:
+5. Run the `baseball.sql` file to initialize the database:
+   - **macOS/Linux**:
      ```sql
      source /path/to/baseball.sql;
      ```
@@ -37,108 +29,92 @@ Welcome to the **MariaDeadbeats** project! This guide provides detailed steps fo
      ```sql
      source C:\\path\\to\\baseball.sql;
      ```
-
-6. Configure the `cfg.py` file with the correct connection information for your database.
-
-7. Navigate to the project directory and run the following command:
+6. Set up a virtual environment and install requirements in the project directory:
+   ```bash
+   cd MariaDeadbeats
+   python -m venv project_env
+   source project_env/bin/activate  # macOS/Linux
+   project_env\Scripts\activate    # Windows
+   pip install -r requirements.txt
+   ```
+7. Configure the `cfg.py` file with the correct connection information for your database.
+8. Navigate to the project root and run the Python script:
    ```bash
    python -m tableActions.updateDB
    ```
-
-8. Your database is now updated!
+9. Your database is updated!
 
 ---
 
 ## **Update Database (SQL Dump - Short/Better Way)**
 
-### Step-by-Step Instructions
+### **Step-by-Step Instructions**
 
-1. Navigate to an empty database or create one:
+1. Create a new database:
    ```sql
    CREATE DATABASE MariaDeadbeats;
    ```
-
-2. Run the provided SQL Dump file:
-   ```sql
-   source /path/to/sql_dump_file.sql;
-   ```
-
+2. Run the SQL dump file:
+   - **macOS/Linux**:
+     ```bash
+     mysql -u your_username -p MariaDeadbeats < /path/to/sql_dump.sql
+     ```
+   - **Windows**:
+     ```cmd
+     mysql -u your_username -p MariaDeadbeats < C:\\path\\to\\sql_dump.sql
+     ```
 3. Your database is updated!
 
 ---
 
-## **Database Updates**
+## **Updates to the Database**
 
-### **New and Updated Tables**
+- **Banned_Users**:
+  - A table with `id`, `username`, and `email`.
+  - Used to show users banned from the Flask application.
 
-#### **Banned_Users**
-- **Description**: Tracks banned users from the Flask application.
-- **Columns**:
-  - `id`
-  - `username`
-  - `email`
+- **Batting**:
+  - Added a new column `b_WAR` from a CSV found at [MLB WAR Data Historical](https://github.com/Neil-Paine-1/MLB-WAR-data-historical).
 
-#### **Batting**
-- **Description**: Added a new column `b_WAR` for Wins Above Replacement.
-- **Source**: [MLB-WAR-data-historical](https://github.com/Neil-Paine-1/MLB-WAR-data-historical).
+- **Draft**:
+  - A table with `draft_id`, `playerID`, `yearID`, `nameFirst`, `nameLast`, `round`, `pick`, `description`.
+  - Only shows players from the Amateur Draft (indicated by the `description` column).
+  - Data sourced from [Baseball Draft Data](https://github.com/double-dose-larry/baseball_draft_data).
 
-#### **Draft**
-- **Description**: Displays Amateur Draft data.
-- **Columns**:
-  - `draft_id`
-  - `playerID`
-  - `yearID`
-  - `nameFirst`
-  - `nameLast`
-  - `round`
-  - `pick`
-  - `description`
-- **Source**: [baseball_draft_data](https://github.com/double-dose-larry/baseball_draft_data).
+- **Parks**:
+  - Added `latitude` and `longitude` columns for displaying a map of parks.
+  - Used Google Geocoding API to obtain these values (configured in `cfg.py`).
 
-#### **Parks**
-- **Description**: Added `latitude` and `longitude` columns for mapping.
-- **Method**: Used Google Geocoding API.
+- **Pitching**:
+  - Added a new column `p_WAR` from a CSV found at [MLB WAR Data Historical](https://github.com/Neil-Paine-1/MLB-WAR-data-historical).
+  - Added a new column `p_NH` for no-hitters, sourced from [Baseball Reference](https://www.baseball-reference.com/friv/no-hitters-and-perfect-games.shtml?utm_campaign=2023_07_ig_possible_answers&utm_source=ig&utm_medium=sr_xsite).
 
-#### **Pitching**
-- **Description**: Added new columns:
-  - `p_WAR` for Wins Above Replacement (Source: [MLB-WAR-data-historical](https://github.com/Neil-Paine-1/MLB-WAR-data-historical))
-  - `p_NH` for no-hitters (Source: [Baseball Reference](https://www.baseball-reference.com/friv/no-hitters-and-perfect-games.shtml))
-
-#### **Users**
-- **Description**: Used for user registration and management in the Flask application.
-- **Columns**:
-  - `id`
-  - `username`
-  - `email`
-  - `time_of_last_access`
-  - `password_hash`
-  - `is_admin`
+- **Users**:
+  - A table with `id`, `username`, `email`, `time_of_last_access`, `password_hash`, and `is_admin`.
+  - This table is used to register new users in the Flask application.
 
 ---
 
-## **Run the Flask Application**
+## **How to Run the Flask App**
 
-1. Clone the Flask application repository:
+### **Step-by-Step Instructions**
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/willclo1/MariaDeadbeatsSite.git
    ```
-
-2. Navigate to the project root directory:
+2. Set up a virtual environment and install requirements:
    ```bash
    cd MariaDeadbeatsSite
+   python -m venv project_env
+   source project_env/bin/activate  # macOS/Linux
+   project_env\Scripts\activate    # Windows
+   pip install -r requirements.txt
    ```
-
-3. Run the Flask application:
+3. Navigate to the project root directory and run the Flask app:
    ```bash
    flask run
    ```
-
-4. Your project is now running and accessible locally!
-
----
-
-## **Enjoy Your MariaDeadbeats Project!**
-
-
+4. The project should now be running!
 
 
