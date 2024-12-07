@@ -117,20 +117,43 @@ def get_players_for_trivia(trivia):
             WHERE round = 1 and batting.yearid > 1964 and nameFirst != 'Jerry' and nameLast != 'Johnson';
         """,
         "40+ WAR Career": """
-            SELECT playerID
-            FROM (
-                SELECT playerID, SUM(b_WAR) AS career_war
-                FROM batting
-                GROUP BY playerID
-                HAVING career_war >= 40
-            ) AS career_war_table;
-        """,
+    SELECT playerID
+    FROM (
+        SELECT playerID, SUM(b_WAR) AS career_war
+        FROM batting
+        GROUP BY playerID
+        HAVING career_war >= 40
+    ) AS career_war_table
+    WHERE playerID IN (
+        SELECT DISTINCT a.playerID
+        FROM appearances a
+        JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+        WHERE t.franchid = (
+            SELECT franchid
+            FROM teams
+            WHERE team_name = %s
+            GROUP BY franchid
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+        ) 
+    );
+""",
 
-        "6+ WAR Season": """
-            SELECT playerID
-            FROM batting
-            WHERE b_WAR >= 6;
-        """,
+"6+ WAR Season": """
+    SELECT b.playerID
+    FROM batting b
+    JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
+    WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )
+    GROUP BY b.playerID, b.yearID
+    HAVING SUM(b_WAR) >= 6;
+""",
         ".300+ AVG CareerBatting": """
             SELECT playerID
             FROM (
@@ -230,8 +253,20 @@ def get_players_for_trivia(trivia):
             WHERE p_G > 0;
         """,
         "Played In Major Negro Lgs": """
-            SELECT DISTINCT playerID
-            FROM negro_leagues;
+            SELECT DISTINCT p.playerID
+FROM people p
+JOIN negroleague nl 
+    ON CONCAT(p.nameFirst, ' ', p.nameLast) = nl.playerName
+    -- Player must have played in the major Negro Leagues (1920-1948)
+    AND nl.startYear <= 1948
+    AND nl.endYear >= 1920
+    -- Ensure MLB career overlaps with Negro League career:
+    AND YEAR(p.debutDate) <= nl.endYear
+    AND YEAR(p.finalGameDate) >= nl.startYear;
+
+
+
+
         """,
         "Puerto Rico": """
             SELECT playerID
@@ -360,7 +395,6 @@ def get_players_for_trivia(trivia):
         "Played Catchermin. 1 game": "SELECT playerID FROM appearances WHERE G_c > 0;",
         "Played Center Fieldmin. 1 game": "SELECT playerID FROM appearances WHERE G_cf > 0;",
         "Played First Basemin. 1 game": "SELECT playerID FROM appearances WHERE G_1b > 0;",
-        "Played In Major Negro Lgs": "SELECT playerID FROM people WHERE lgID = 'Negro';",
         "Played Left Fieldmin. 1 game": "SELECT playerID FROM appearances WHERE G_lf > 0;",
         "Played Outfieldmin. 1 game": "SELECT playerID FROM appearances WHERE G_of > 0;",
         "Played Right Fieldmin. 1 game": "SELECT playerID FROM appearances WHERE G_rf > 0;",
@@ -800,17 +834,29 @@ WHERE p.birthCountry != 'USA'
         )  AND p.p_G > 0;
         """,
     "Played In Major Negro Lgs": """
-            SELECT DISTINCT n.playerID
-            FROM negro_leagues n
-            JOIN teams t ON n.teamID = t.teamID AND n.yearID = t.yearID
-            WHERE t.franchid = (
-            SELECT franchid
-            FROM teams
-            WHERE team_name = %s
-            GROUP BY franchid
-            ORDER BY COUNT(*) DESC
-            LIMIT 1
-        ) ;
+   SELECT DISTINCT p.playerID
+FROM people p
+JOIN negroleague nl 
+    ON CONCAT(p.nameFirst, ' ', p.nameLast) = nl.playerName
+WHERE nl.startYear <= 1948
+  AND nl.endYear >= 1920
+  AND p.playerID IN (
+      SELECT DISTINCT a.playerID
+      FROM appearances a
+      JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+      WHERE t.franchid = (
+          SELECT franchid
+          FROM teams
+          WHERE team_name = %s
+          GROUP BY franchid
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+      )
+  );
+
+
+
+
         """,
     "Puerto Rico": """
             SELECT playerID
