@@ -117,4 +117,10 @@
    ```
 4. The project should now be running!
 
+## **Admin login**
+ - **Username**
+   - admin
+- **Password**
+  - pass
+
 
