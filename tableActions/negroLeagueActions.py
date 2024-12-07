@@ -126,5 +126,3 @@ def update_negro_league_table():
 
     finally:
         session.close()
-
-update_negro_league_table()
