@@ -117,43 +117,34 @@ def get_players_for_trivia(trivia):
             WHERE round = 1 and batting.yearid > 1964 and nameFirst != 'Jerry' and nameLast != 'Johnson';
         """,
         "40+ WAR Career": """
-    SELECT playerID
-    FROM (
-        SELECT playerID, SUM(b_WAR) AS career_war
-        FROM batting
-        GROUP BY playerID
-        HAVING career_war >= 40
-    ) AS career_war_table
-    WHERE playerID IN (
-        SELECT DISTINCT a.playerID
-        FROM appearances a
-        JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-        WHERE t.franchid = (
-            SELECT franchid
-            FROM teams
-            WHERE team_name = %s
-            GROUP BY franchid
-            ORDER BY COUNT(*) DESC
-            LIMIT 1
-        ) 
-    );
-""",
+        SELECT playerID
+        FROM (
+            SELECT b.playerID, 
+                   (COALESCE(SUM(b.b_WAR),0) 
+                    + COALESCE((SELECT SUM(p_WAR) 
+                                FROM pitching 
+                                WHERE pitching.playerID = b.playerID), 0)) AS career_war
+            FROM batting b
+            GROUP BY b.playerID
+            HAVING career_war >= 40
+        ) AS career_war_table;
+    """,
 
-"6+ WAR Season": """
-    SELECT b.playerID
-    FROM batting b
-    JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
-    WHERE t.franchid = (
-        SELECT franchid
-        FROM teams
-        WHERE team_name = %s
-        GROUP BY franchid
-        ORDER BY COUNT(*) DESC
-        LIMIT 1
-    )
-    GROUP BY b.playerID, b.yearID
-    HAVING SUM(b_WAR) >= 6;
-""",
+    "6+ WAR Season": """
+        SELECT playerID
+        FROM (
+            SELECT b.playerID, b.yearID,
+                   (COALESCE(SUM(b.b_WAR),0) 
+                    + COALESCE((SELECT SUM(p_WAR) 
+                                FROM pitching 
+                                WHERE pitching.playerID = b.playerID 
+                                AND pitching.yearID = b.yearID), 0)) AS season_war
+            FROM batting b
+            GROUP BY b.playerID, b.yearID
+            HAVING season_war >= 6
+        ) AS season_war_table;
+    """,
+
         ".300+ AVG CareerBatting": """
             SELECT playerID
             FROM (
@@ -937,41 +928,44 @@ WHERE nl.startYear <= 1948
         ) ;
         """,
     "40+ WAR Career": """
-        SELECT playerID
-        FROM (
-            SELECT b.playerID, SUM(b.b_WAR) AS career_war, SUM(p.p_WAR) AS carrer_war_pitching
-            FROM batting b, pitching p
-            GROUP BY b.playerID
-            HAVING career_war >= 40 or carrer_war_pitching >= 40
-        ) AS career_war_table
-        WHERE playerID IN (
-            SELECT DISTINCT a.playerID
-            FROM appearances a
-            JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
-            WHERE t.franchid = (
-                SELECT franchid
-                FROM teams
-                WHERE team_name = %s
-                GROUP BY franchid
-                ORDER BY COUNT(*) DESC
-                LIMIT 1
-            ) 
-        );
-    """,
-
-    "6+ WAR Season": """
-            SELECT b.playerID
-            FROM batting b, pitching p
-            JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
-            WHERE t.franchid = (
+    SELECT playerID
+    FROM (
+        SELECT playerID, SUM(b_WAR) AS career_war
+        FROM batting
+        GROUP BY playerID
+        HAVING career_war >= 40
+    ) AS career_war_table
+    WHERE playerID IN (
+        SELECT DISTINCT a.playerID
+        FROM appearances a
+        JOIN teams t ON a.teamID = t.teamID AND a.yearID = t.yearID
+        WHERE t.franchid = (
             SELECT franchid
             FROM teams
             WHERE team_name = %s
             GROUP BY franchid
             ORDER BY COUNT(*) DESC
             LIMIT 1
-        )  AND (b.b_WAR >= 6 OR p.p_WAR >= 6);
-        """,
+        ) 
+    );
+""",
+
+"6+ WAR Season": """
+    SELECT b.playerID
+    FROM batting b
+    JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID
+    WHERE t.franchid = (
+        SELECT franchid
+        FROM teams
+        WHERE team_name = %s
+        GROUP BY franchid
+        ORDER BY COUNT(*) DESC
+        LIMIT 1
+    )
+    GROUP BY b.playerID, b.yearID
+    HAVING SUM(b_WAR) >= 6;
+""",
+
     ".300+ AVG CareerBatting": """
             SELECT playerID
             FROM (
