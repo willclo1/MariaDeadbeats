@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 
 def execute_sql(engine, statement):
     with engine.connect() as conn:
@@ -37,4 +37,3 @@ def create_guest_user():
 
     except Exception as e:
         print(f"An error occurred: {e}")
-

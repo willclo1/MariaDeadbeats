@@ -54,21 +54,7 @@
    ```sql
    CREATE DATABASE MariaDeadbeats;
    ```
-2. Make a guest user
-   - ```sql
-      -- Drop the user if it already exists
-      DROP USER IF EXISTS 'guest_user'@'localhost';
-      
-      -- Create the guest user with a password
-      CREATE USER 'guest_user'@'localhost' IDENTIFIED BY 'guestPassword123';
-      
-      -- Grant permissions to the guest user on the specified database
-      GRANT SELECT, INSERT, UPDATE, DELETE ON mariadeadbeats.* TO 'guest_user'@'localhost';
-      
-      -- Apply the privilege changes
-      FLUSH PRIVILEGES;
-     ```
-4. Run the SQL dump file:
+2. Run the SQL dump file:
    - **macOS/Linux**:
      ```bash
      mysql -u your_username -p MariaDeadbeats < /path/to/sql_dump.sql
@@ -197,3 +183,4 @@
   - Also uses sportradar api to get up-to-date information.
  
 Check out the app! It is really cool and has a lot of awesome features! 
+

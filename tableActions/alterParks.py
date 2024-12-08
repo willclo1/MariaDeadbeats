@@ -1,7 +1,7 @@
 from requests.adapters import HTTPAdapter
 from sqlalchemy import create_engine, text
 from urllib3 import Retry
-from .cfg import engineStr, API_KEY
+from .csi3335f2024 import engineStr, API_KEY
 import requests
 
 def create_parks_columns():

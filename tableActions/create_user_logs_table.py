@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from cfg import engineStr
+from .csi3335f2024 import engineStr
 from sqlalchemy.orm import sessionmaker
 from Tables.UserLogs import Base, UserLogs
 
@@ -19,4 +19,3 @@ def create_user_logs_table():
 
     finally:
         session.close()
-create_user_logs_table()

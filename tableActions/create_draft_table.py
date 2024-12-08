@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from sqlalchemy.orm import sessionmaker
 from Tables.Draft import Base, Draft
 

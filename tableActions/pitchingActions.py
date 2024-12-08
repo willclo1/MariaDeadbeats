@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from Tables.Pitching import Pitching
 from Tables.People import People  # Assuming you have a People table model
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from .csvActions import getPeopleData, getNewData, getAllData
 import os
 

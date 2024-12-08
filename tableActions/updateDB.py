@@ -21,7 +21,6 @@ from tableActions.DraftActions import fillDraft
 from tableActions.create_users_table import create_users_table
 from tableActions.addGuestUser import create_guest_user
 from tableActions.create_banned_users_table import create_banned_users_table
-from tableActions.alterParks import create_parks_columns, update_lat_longitude
 from tableActions.addAdmin import create_admin_user
 from tableActions.create_user_logs_table import create_user_logs_table
 from tableActions.alterParks import update_lat_longitude
