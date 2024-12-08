@@ -19,4 +19,3 @@ def create_user_logs_table():
 
     finally:
         session.close()
-create_user_logs_table()
