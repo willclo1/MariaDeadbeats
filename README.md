@@ -108,6 +108,10 @@
   - A table with `id`, `username`, and `email`.
   - Used to show users banned from the Flask application.
 
+- **UserLogs**:
+  - A table with 'log_id', 'username', 'team_name', 'yearID', and 'time_of_query'
+  - Used to record user-system interactions.
+
 - **Batting**:
   - Added a new column `b_WAR` from a CSV found at [MLB WAR Data Historical](https://github.com/Neil-Paine-1/MLB-WAR-data-historical).
 
@@ -164,14 +168,16 @@
 
 - **User Account(Nick)**
   - Through creation of an account, users are allowed to access any pages locked 
-  - through the @login_required annotation.
+  - through the @login_required annotation. 
+  - When not logged in if user attempts to navigate to a restricted page, they are sent to
+  - the login page and will be routed back to their desired page upon a successful login.
   - User passwords are hashed when stored in our database and User Emails are required to
   - fit a valid email format.
 
 - **Admin Account(Nick)**
   - An account that can be used to control access to the application
-  - Has the ability to ban users, unban users, view a list of banned users,
-  - and create other admin users.
+  - Has the ability to ban users, unban users, view a list of banned users, create other admin users,
+  - and view user logs.
   - Login info:
       - username: `admin`
       - password: `pass`
