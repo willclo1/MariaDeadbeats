@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Tables.People import People
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from .csvActions import getPeopleData
 from datetime import datetime
 import os

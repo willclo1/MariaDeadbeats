@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
 from Tables.appearances import Appearances
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from .csvActions import getNewData
 
 

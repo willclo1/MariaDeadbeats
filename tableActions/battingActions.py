@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.sync import update
 
 from Tables.Batting import Batting
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 import os
 from .csvActions import getNewData, getAllData
 

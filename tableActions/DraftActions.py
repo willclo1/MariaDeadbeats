@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from Tables.Draft import Draft
 from Tables.People import People
 from .csvActions import getDraftData
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 import os
 
 

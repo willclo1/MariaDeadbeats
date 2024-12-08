@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timezone
 

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from Tables.Fielding import Fielding
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from .csvActions import getNewData
 import os
 

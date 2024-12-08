@@ -2,7 +2,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import requests
 from sqlalchemy import create_engine
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from sqlalchemy.orm import sessionmaker
 from Tables.negroLeague import Base, NegroLeague
 

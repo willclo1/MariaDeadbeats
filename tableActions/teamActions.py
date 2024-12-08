@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from .csvActions import getNewData
-from .cfg import engineStr
+from .csi3335f2024 import engineStr
 from Tables.Teams import Teams
 import math
 import os
