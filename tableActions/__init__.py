@@ -18,3 +18,4 @@ from .managersActions import fillManagers
 from .create_users_table import create_users_table
 from .create_banned_users_table import create_banned_users_table
 from .addAdmin import create_admin_user
+from .create_user_logs_table import create_user_logs_table
