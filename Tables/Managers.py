@@ -1,8 +1,10 @@
 from sqlalchemy import Column, SmallInteger, VARCHAR, CHAR, Integer
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class Managers(Base):
     __tablename__ = 'managers'

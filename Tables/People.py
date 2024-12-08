@@ -1,8 +1,10 @@
 from sqlalchemy import Integer, Column, VARCHAR, Date
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class People(Base):
     __tablename__ = 'people'

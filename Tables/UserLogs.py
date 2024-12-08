@@ -4,8 +4,10 @@ import sqlalchemy.orm as so
 from datetime import datetime, timezone
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class UserLogs(Base):
     __tablename__ = 'user_logs'

@@ -1,8 +1,10 @@
 from sqlalchemy import Column, VARCHAR, Float
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class Parks(Base):
     __tablename__ = 'parks'

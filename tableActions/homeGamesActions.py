@@ -21,7 +21,6 @@ def fillHomeGame():
 
     try:
 
-
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'HomeGames.csv')
         currData = getHomeData(batting_post_csv_path)

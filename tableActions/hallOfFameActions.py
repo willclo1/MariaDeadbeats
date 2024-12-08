@@ -7,7 +7,6 @@ import os
 
 
 def fillHallOfFame():
-
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()

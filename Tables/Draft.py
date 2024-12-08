@@ -6,6 +6,7 @@ from sqlalchemy.orm import DeclarativeBase
 class Base(DeclarativeBase):
     pass
 
+
 class Draft(Base):
     __tablename__ = 'draft'
     drafts_id = Column(INTEGER(11), primary_key=True, autoincrement=True)

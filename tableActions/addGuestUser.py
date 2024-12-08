@@ -1,10 +1,12 @@
 from sqlalchemy import create_engine, text
 from .csi3335f2024 import engineStr
 
+
 def execute_sql(engine, statement):
     with engine.connect() as conn:
         conn.execute(text(statement))
         conn.commit()
+
 
 def create_guest_user():
     GUEST_USERNAME = 'guest_user'

@@ -7,7 +7,6 @@ from .csvActions import getNewData
 
 
 def fillAppearances():
-
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -49,7 +48,3 @@ def fillAppearances():
         print(e)
     finally:
         session.close()
-
-
-
-

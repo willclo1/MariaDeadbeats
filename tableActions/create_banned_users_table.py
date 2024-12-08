@@ -3,6 +3,7 @@ from .csi3335f2024 import engineStr
 from sqlalchemy.orm import sessionmaker
 from Tables.BannedUsers import Base, BannedUsers
 
+
 def create_banned_users_table():
     engine = create_engine(engineStr, echo=True)
     Base.metadata.create_all(engine)

@@ -2,8 +2,11 @@ from sqlalchemy import Integer, Column, String, SmallInteger, CHAR, VARCHAR
 from sqlalchemy.dialects.mysql import INTEGER, DOUBLE
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
+
 class AwardsShare(Base):
     __tablename__ = 'awardsshare'
     awardsshare_id = Column(INTEGER(12), primary_key=True, autoincrement=True)

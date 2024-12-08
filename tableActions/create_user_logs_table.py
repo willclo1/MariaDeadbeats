@@ -3,6 +3,7 @@ from .csi3335f2024 import engineStr
 from sqlalchemy.orm import sessionmaker
 from Tables.UserLogs import Base, UserLogs
 
+
 def create_user_logs_table():
     engine = create_engine(engineStr, echo=True)
     Base.metadata.create_all(engine)

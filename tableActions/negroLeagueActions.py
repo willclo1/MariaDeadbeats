@@ -74,6 +74,7 @@ def fetch_negro_league_players(url, output_csv=None):
 
     return df
 
+
 def create_negro_league_table():
     engine = create_engine(engineStr, echo=True)
     Base.metadata.create_all(engine)
@@ -115,7 +116,6 @@ def update_negro_league_table():
                 position=row["Position"]
             )
             session.add(player)
-
 
         session.commit()
         print("NegroLeague table updated successfully!")

@@ -2,8 +2,10 @@ from sqlalchemy import Integer, Column, String, Numeric, create_engine, SmallInt
 from sqlalchemy.dialects.mysql import *
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class AllStarFull(Base):
     __tablename__ = 'allstarfull'
@@ -15,8 +17,3 @@ class AllStarFull(Base):
     gameID = Column(VARCHAR(12))
     GP = Column(SmallInteger)
     startingPos = Column(SmallInteger)
-
-
-
-
-

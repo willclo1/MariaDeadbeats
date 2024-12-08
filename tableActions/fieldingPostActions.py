@@ -6,8 +6,8 @@ from .csi3335f2024 import engineStr
 from .csvActions import getNewData
 import os
 
-def fillFieldingPost():
 
+def fillFieldingPost():
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()

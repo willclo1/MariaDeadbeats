@@ -8,6 +8,7 @@ from .csi3335f2024 import engineStr
 import os
 from .csvActions import getNewData, getAllData
 
+
 def add_column_to_batting():
     engine = create_engine(engineStr)
     with engine.connect() as conn:
@@ -18,8 +19,8 @@ def add_column_to_batting():
         except Exception as e:
             print(f"An error occurred while altering the table: {e}")
 
-def fillBatting():
 
+def fillBatting():
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -27,13 +28,10 @@ def fillBatting():
     try:
         add_column_to_batting()
 
-
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
 
         batting_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'Batting.csv')
         war_data_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'jeffbagwell_war_historical_2023.csv')
-
 
         currData = getNewData(batting_csv_path)
         warData = getAllData(war_data_csv_path)
@@ -76,8 +74,6 @@ def fillBatting():
                 Batting.playerID == player_id, Batting.yearId == year_id
             ).update({"b_WAR": war_value})
 
-
-
         session.commit()
         print("Batting updated")
     except Exception as e:
@@ -85,6 +81,3 @@ def fillBatting():
         print(f"An error occurred: {e}")
     finally:
         session.close()  # Close the session
-
-
-

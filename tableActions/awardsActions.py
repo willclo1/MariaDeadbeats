@@ -7,7 +7,6 @@ import os
 
 
 def fillAwards():
-
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -25,7 +24,7 @@ def fillAwards():
         for row in totalData:
             new_row = Awards(
                 awardID=row[1],
-                yearID = row[2],
+                yearID=row[2],
                 playerID=row[0],
                 lgID=row[3],
                 tie=row[4],

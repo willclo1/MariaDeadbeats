@@ -6,8 +6,8 @@ from .csi3335f2024 import engineStr
 from .csvActions import getNewData
 import os
 
-def fillCollegePlaying():
 
+def fillCollegePlaying():
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -25,7 +25,6 @@ def fillCollegePlaying():
             )
             session.add(new_record)
 
-
         session.commit()
         print("College playing updated")
     except Exception as e:
@@ -33,4 +32,3 @@ def fillCollegePlaying():
         print(f"An error occurred: {e}")
     finally:
         session.close()
-

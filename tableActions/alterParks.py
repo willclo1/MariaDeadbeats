@@ -4,6 +4,7 @@ from urllib3 import Retry
 from .csi3335f2024 import engineStr, API_KEY
 import requests
 
+
 def create_parks_columns():
     engine = create_engine(engineStr)
     with engine.connect() as conn:
@@ -41,13 +42,13 @@ def update_lat_longitude():
     create_parks_columns()
     with engine.connect() as conn:
         try:
-            result = conn.execute(text("SELECT parkID, park_name, city, state, country FROM parks WHERE latitude IS NULL OR longitude IS NULL"))
+            result = conn.execute(text(
+                "SELECT parkID, park_name, city, state, country FROM parks WHERE latitude IS NULL OR longitude IS NULL"))
             parks = result.fetchall()
 
             for park in parks:
                 parkID, park_name, city, state, country = park
                 address = f"{park_name}, {city}, {state}, {country}"
-
 
                 latitude, longitude = get_coordinates(address)
                 if latitude and longitude:

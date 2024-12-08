@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import html
 
+
 def getNewData(fileName):
     currData = []
     with open(fileName) as file:
@@ -42,6 +43,7 @@ def getPeopleData(fileName):
 
     return currData
 
+
 def getHomeData(fileName):
     currData = []
     with open(fileName) as file:
@@ -57,6 +59,7 @@ def getHomeData(fileName):
 
     return currData
 
+
 def getAllData(fileName):
     currData = []
     with open(fileName, encoding='latin1') as file:
@@ -66,6 +69,7 @@ def getAllData(fileName):
             currData.append(row)
 
     return currData
+
 
 def getDraftData(fileName):
     import datetime
@@ -112,12 +116,14 @@ def getDraftData(fileName):
                 "bats": bats_value,
                 "throws": throws_value,
                 "birth_date": birth_date_value,
-                "year" :row[year_index],
+                "year": row[year_index],
             }
             if row[description_index] == "June Amateur Draft":
                 draft_data.append(draft_row)
 
     return draft_data
+
+
 def normalize_text(text):
     if text:
         text = html.unescape(text.strip())  # Unescape HTML entities
@@ -158,6 +164,3 @@ def scrape_no_hitters_to_csv(url, output_csv):
 
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
-

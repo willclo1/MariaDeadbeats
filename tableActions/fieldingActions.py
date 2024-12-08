@@ -6,14 +6,13 @@ from .csi3335f2024 import engineStr
 from .csvActions import getNewData
 import os
 
-def fillFielding():
 
+def fillFielding():
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
 
     try:
-
 
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'Fielding.csv')
@@ -49,4 +48,3 @@ def fillFielding():
         print(f"An error occurred: {e}")
     finally:
         session.close()
-

@@ -29,8 +29,8 @@ from tableActions.alterParks import update_lat_longitude
 def updateDB():
     try:
         steps = [
-            fillPeople,fillPitching, fillFielding, fillAllStartFull,
-            fillAppearances,fillAwards, fillAwardsShare, fillBatting, fillBattingPost,
+            fillPeople, fillPitching, fillFielding, fillAllStartFull,
+            fillAppearances, fillAwards, fillAwardsShare, fillBatting, fillBattingPost,
             fillCollegePlaying, update_lat_longitude, fillFieldingPost,
             fillHallOfFame, fillHomeGame, fillManagers,
             fillPostPitching, fillSeriesPost, create_draft_table,
@@ -44,6 +44,7 @@ def updateDB():
         print(f"Error: {e}")
     finally:
         print('Database updated')
+
 
 if __name__ == "__main__":
     updateDB()

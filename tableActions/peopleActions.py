@@ -24,7 +24,6 @@ def fillPeople():
         batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'People.csv')
         currData = getPeopleData(batting_post_csv_path)
 
-
         for row in currData:
             new_person = People(
                 playerID=row[1],  # Map "playerID" column
@@ -59,4 +58,3 @@ def fillPeople():
         print(f"An error occurred: {e}")
     finally:
         session.close()
-

@@ -2,8 +2,10 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class BannedUsers(Base):
     __tablename__ = 'banned_users'

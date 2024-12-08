@@ -9,7 +9,6 @@ import os
 
 
 def fillAwardsShare():
-
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -30,7 +29,7 @@ def fillAwardsShare():
         for row in totalData:
             new_row = AwardsShare(
                 awardID=row[0],
-                yearID = row[1],
+                yearID=row[1],
                 playerID=row[3],
                 lgID=row[2],
                 pointsWon=row[4] if row[4] else None,

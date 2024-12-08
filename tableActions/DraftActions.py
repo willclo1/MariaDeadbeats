@@ -7,9 +7,7 @@ from .csi3335f2024 import engineStr
 import os
 
 
-
 def fillDraft():
-
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()

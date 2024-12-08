@@ -2,8 +2,10 @@ from sqlalchemy import Integer, Column, SmallInteger, VARCHAR, CHAR
 from sqlalchemy.dialects.mysql import INTEGER, DOUBLE
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class Fielding(Base):
     __tablename__ = 'fielding'

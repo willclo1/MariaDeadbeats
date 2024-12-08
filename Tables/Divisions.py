@@ -2,10 +2,12 @@ from sqlalchemy import Integer, Column, String, SmallInteger, CHAR, VARCHAR
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import DeclarativeBase
 
+
 # No new divisions in 2023, no update required
 
 class Base(DeclarativeBase):
     pass
+
 
 class Divisions(Base):
     __tablename__ = 'divisions'

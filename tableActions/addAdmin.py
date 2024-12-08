@@ -4,11 +4,11 @@ from werkzeug.security import generate_password_hash
 from datetime import datetime, timezone
 
 
-
 def execute_sql(engine, statement):
     with engine.connect() as conn:
         conn.execute(text(statement))
         conn.commit()
+
 
 def create_admin_user():
     ADMIN_USER_USERNAME = 'admin'
@@ -41,4 +41,3 @@ def create_admin_user():
 
     except Exception as e:
         print(f"An error occurred: {e}")
-

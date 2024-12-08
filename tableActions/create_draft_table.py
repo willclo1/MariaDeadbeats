@@ -3,6 +3,7 @@ from .csi3335f2024 import engineStr
 from sqlalchemy.orm import sessionmaker
 from Tables.Draft import Base, Draft
 
+
 def create_draft_table():
     engine = create_engine(engineStr, echo=True)
     Base.metadata.create_all(engine)
@@ -19,4 +20,3 @@ def create_draft_table():
 
     finally:
         session.close()
-

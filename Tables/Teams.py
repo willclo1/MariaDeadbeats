@@ -2,8 +2,10 @@ from sqlalchemy import Integer, Column, SmallInteger, CHAR, VARCHAR, Double
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import DeclarativeBase
 
+
 class Base(DeclarativeBase):
     pass
+
 
 class Teams(Base):
     __tablename__ = 'teams'

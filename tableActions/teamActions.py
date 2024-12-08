@@ -7,6 +7,7 @@ from Tables.Teams import Teams
 import math
 import os
 
+
 def fillTeams():
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
@@ -20,7 +21,7 @@ def fillTeams():
 
         # Loop through rows and add them to the Teams table
         for row in currData:
-            team_projW = float(row[14])/float(row[26])
+            team_projW = float(row[14]) / float(row[26])
             team_projW = team_projW ** 1.83
             team_projW = team_projW / (team_projW + 1)
             team_projW = math.floor(team_projW * 162)

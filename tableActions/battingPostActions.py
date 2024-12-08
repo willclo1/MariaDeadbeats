@@ -6,8 +6,8 @@ from .csi3335f2024 import engineStr
 from .csvActions import getNewData
 import os
 
-def fillBattingPost():
 
+def fillBattingPost():
     engine = create_engine(engineStr)
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -42,7 +42,6 @@ def fillBattingPost():
                 b_GIDP=int(row[21]) if row[21] else None,
             )
             session.add(new_record)  # Add the record to the session
-
 
         session.commit()
         print("Batting Post updated")
