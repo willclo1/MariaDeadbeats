@@ -54,21 +54,7 @@
    ```sql
    CREATE DATABASE MariaDeadbeats;
    ```
-2. Make a guest user
-   - ```sql
-      -- Drop the user if it already exists
-      DROP USER IF EXISTS 'guest_user'@'localhost';
-      
-      -- Create the guest user with a password
-      CREATE USER 'guest_user'@'localhost' IDENTIFIED BY 'guestPassword123';
-      
-      -- Grant permissions to the guest user on the specified database
-      GRANT SELECT, INSERT, UPDATE, DELETE ON mariadeadbeats.* TO 'guest_user'@'localhost';
-      
-      -- Apply the privilege changes
-      FLUSH PRIVILEGES;
-     ```
-4. Run the SQL dump file:
+2. Run the SQL dump file:
    - **macOS/Linux**:
      ```bash
      mysql -u your_username -p MariaDeadbeats < /path/to/sql_dump.sql
@@ -107,6 +93,10 @@
 - **Banned_Users**:
   - A table with `id`, `username`, and `email`.
   - Used to show users banned from the Flask application.
+
+- **UserLogs**:
+  - A table with 'log_id', 'username', 'team_name', 'yearID', and 'time_of_query'
+  - Used to record user-system interactions.
 
 - **Batting**:
   - Added a new column `b_WAR` from a CSV found at [MLB WAR Data Historical](https://github.com/Neil-Paine-1/MLB-WAR-data-historical).
@@ -164,14 +154,16 @@
 
 - **User Account(Nick)**
   - Through creation of an account, users are allowed to access any pages locked 
-  - through the @login_required annotation.
+  - through the @login_required annotation. 
+  - When not logged in if user attempts to navigate to a restricted page, they are sent to
+  - the login page and will be routed back to their desired page upon a successful login.
   - User passwords are hashed when stored in our database and User Emails are required to
   - fit a valid email format.
 
 - **Admin Account(Nick)**
   - An account that can be used to control access to the application
-  - Has the ability to ban users, unban users, view a list of banned users,
-  - and create other admin users.
+  - Has the ability to ban users, unban users, view a list of banned users, create other admin users,
+  - and view user logs.
   - Login info:
       - username: `admin`
       - password: `pass`
@@ -191,3 +183,4 @@
   - Also uses sportradar api to get up-to-date information.
  
 Check out the app! It is really cool and has a lot of awesome features! 
+
