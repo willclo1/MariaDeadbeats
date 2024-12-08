@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-from cfg import engineStr
+from .cfg import engineStr
 
 def execute_sql(engine, statement):
     with engine.connect() as conn:

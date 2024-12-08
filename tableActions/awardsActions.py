@@ -1,8 +1,9 @@
 from Tables.Awards import Awards
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from cfg import engineStr
-from tableActions.csvActions import getNewData
+from .cfg import engineStr
+from .csvActions import getNewData
+import os
 
 
 def fillAwards():
@@ -11,8 +12,13 @@ def fillAwards():
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
-        currData = getNewData("lahman_1871-2023_csv/AwardsManagers.csv")
-        additionalAwardsData = getNewData("lahman_1871-2023_csv/AwardsPlayers.csv")
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        awards_managers_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'AwardsManagers.csv')
+        awards_players_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'AwardsPlayers.csv')
+
+        currData = getNewData(awards_managers_csv_path)
+        additionalAwardsData = getNewData(awards_players_csv_path)
 
         totalData = additionalAwardsData + currData
 

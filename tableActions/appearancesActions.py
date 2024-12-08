@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
+import os
 from Tables.appearances import Appearances
-from cfg import engineStr
-from tableActions.csvActions import getNewData
+from .cfg import engineStr
+from .csvActions import getNewData
 
 
 def fillAppearances():
@@ -12,7 +12,12 @@ def fillAppearances():
     Session = sessionmaker(bind=engine)
     session = Session()
     try:
-        currData = getNewData("lahman_1871-2023_csv/Appearances.csv")
+
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+        csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'Appearances.csv')
+
+        currData = getNewData(csv_path)
         for row in currData:
             new_row = Appearances(
                 playerID=row[3],

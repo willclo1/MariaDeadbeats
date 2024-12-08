@@ -1,10 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-from csvActions import getNewData
-from cfg import engineStr
+from .csvActions import getNewData
+from .cfg import engineStr
 from Tables.Teams import Teams
 import math
+import os
 
 def fillTeams():
     engine = create_engine(engineStr)
@@ -12,7 +13,10 @@ def fillTeams():
     session = Session()
 
     try:
-        currData = getNewData("lahman_1871-2023_csv/Teams.csv")
+
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'Teams.csv')
+        currData = getNewData(batting_post_csv_path)
 
         # Loop through rows and add them to the Teams table
         for row in currData:

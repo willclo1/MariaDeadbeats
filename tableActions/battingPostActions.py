@@ -2,8 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 from Tables.battingPost import BattingPost
-from cfg import engineStr
-from tableActions.csvActions import getNewData
+from .cfg import engineStr
+from .csvActions import getNewData
+import os
 
 def fillBattingPost():
 
@@ -12,7 +13,9 @@ def fillBattingPost():
     session = Session()
 
     try:
-        currData = getNewData("lahman_1871-2023_csv/BattingPost.csv")
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'BattingPost.csv')
+        currData = getNewData(batting_post_csv_path)
 
         for row in currData:
             new_record = BattingPost(

@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from cfg import engineStr
+from .cfg import engineStr
 from sqlalchemy.orm import sessionmaker
 from Tables.BannedUsers import Base, BannedUsers
 
@@ -19,4 +19,3 @@ def create_banned_users_table():
 
     finally:
         session.close()
-create_banned_users_table()

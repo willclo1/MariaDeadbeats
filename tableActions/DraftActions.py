@@ -2,9 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Tables.Draft import Draft
 from Tables.People import People
-from csvActions import getDraftData
-from cfg import engineStr
-import csv
+from .csvActions import getDraftData
+from .cfg import engineStr
+import os
+
 
 
 def fillDraft():
@@ -14,10 +15,12 @@ def fillDraft():
     session = Session()
 
     try:
-        # Load draft data from CSV
-        draft_data = getDraftData("lahman_1871-2023_csv/draft_1965_2019.csv")
 
-        for draft_row in draft_data:
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'draft_1965_2019.csv')
+        currData = getDraftData(batting_post_csv_path)
+
+        for draft_row in currData:
             person_query = session.query(People).filter(
                 People.nameFirst == draft_row["nameFirst"],
                 People.nameLast == draft_row["nameLast"]

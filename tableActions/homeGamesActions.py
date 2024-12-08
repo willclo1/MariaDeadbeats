@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Tables.homeGames import HomeGames
-from cfg import engineStr
-from tableActions.csvActions import getPeopleData, getNewData, getHomeData
+from .cfg import engineStr
+from .csvActions import getPeopleData, getNewData, getHomeData
 from datetime import datetime
+import os
 
 
 def parse_date(date_str):
@@ -20,7 +21,10 @@ def fillHomeGame():
 
     try:
 
-        currData = getHomeData("lahman_1871-2023_csv/HomeGames.csv")
+
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'HomeGames.csv')
+        currData = getHomeData(batting_post_csv_path)
 
         for row in currData:
             new_person = HomeGames(

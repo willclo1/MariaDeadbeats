@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine, text
-from cfg import engineStr
+from .cfg import engineStr
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timezone
 
@@ -42,4 +42,3 @@ def create_admin_user():
     except Exception as e:
         print(f"An error occurred: {e}")
 
-create_admin_user()

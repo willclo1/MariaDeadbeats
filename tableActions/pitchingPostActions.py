@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from Tables.pitchingPost import PitchingPost
-from cfg import engineStr
-from tableActions.csvActions import getPeopleData, getNewData
+from .cfg import engineStr
+from .csvActions import getPeopleData, getNewData
+import os
 
 def fillPostPitching():
     engine = create_engine(engineStr)
@@ -11,7 +12,10 @@ def fillPostPitching():
 
     try:
 
-        currData = getNewData("lahman_1871-2023_csv/PitchingPost.csv")
+
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+        batting_post_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'PitchingPost.csv')
+        currData = getNewData(batting_post_csv_path)
 
         for row in currData:
             new_row = PitchingPost(

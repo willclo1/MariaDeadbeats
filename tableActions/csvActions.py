@@ -1,4 +1,10 @@
 import csv
+import requests
+import unicodedata
+from bs4 import BeautifulSoup
+import pandas as pd
+import html
+
 def getNewData(fileName):
     currData = []
     with open(fileName) as file:
@@ -62,10 +68,6 @@ def getAllData(fileName):
     return currData
 
 def getDraftData(fileName):
-    """
-    Extract draft-related data, including nameFirst, nameLast, and attributes used for disambiguation.
-    Attributes not part of the Draft table (e.g., weight, bats, throws, birth_date) are used only for mapping.
-    """
     import datetime
 
     draft_data = []
@@ -116,3 +118,46 @@ def getDraftData(fileName):
                 draft_data.append(draft_row)
 
     return draft_data
+def normalize_text(text):
+    if text:
+        text = html.unescape(text.strip())  # Unescape HTML entities
+        text = unicodedata.normalize('NFKD', text).encode('ASCII', 'ignore').decode('utf-8')  # Remove accents
+        text = text.replace('*', '')  # Remove asterisks
+    return text or ""
+
+
+def scrape_no_hitters_to_csv(url, output_csv):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        html_content = response.text
+
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        table = soup.find('table')
+
+        if not table:
+            print("Table not found on the page.")
+            return
+
+        data = []
+        for row in table.tbody.find_all('tr'):
+            cells = row.find_all(['th', 'td'])
+            if cells[1].text.strip() == 'Name':
+                continue
+            if len(cells) > 2:
+                year = cells[5].text.strip()
+                player_name = normalize_text(cells[1].text.strip())
+                team = normalize_text(cells[7].text.strip())
+                data.append([year, player_name, team])
+
+        # Save data to a CSV file using pandas
+        df = pd.DataFrame(data, columns=['Year', 'Player', 'Team'])
+        df.to_csv(output_csv, index=False)
+        print(f"Data has been successfully saved to '{output_csv}'.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+

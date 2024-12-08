@@ -4,8 +4,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.sync import update
 
 from Tables.Batting import Batting
-from cfg import engineStr
-from tableActions.csvActions import getNewData, getAllData
+from .cfg import engineStr
+import os
+from .csvActions import getNewData, getAllData
 
 def add_column_to_batting():
     engine = create_engine(engineStr)
@@ -25,10 +26,17 @@ def fillBatting():
 
     try:
         add_column_to_batting()
-        currData = getNewData("lahman_1871-2023_csv/Batting.csv")
 
-        warData = getAllData("lahman_1871-2023_csv/jeffbagwell_war_historical_2023.csv")
 
+        BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+        batting_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'Batting.csv')
+        war_data_csv_path = os.path.join(BASE_DIR, 'lahman_1871-2023_csv', 'jeffbagwell_war_historical_2023.csv')
+
+
+        currData = getNewData(batting_csv_path)
+        warData = getAllData(war_data_csv_path)
 
         for row in currData:
             new_record = Batting(
